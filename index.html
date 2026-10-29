@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Indicatieve Nederlandse WW-berekening voor grensarbeiders die in Nederland wonen en in België werken.">
+<title>WW Grensarbeider Calculator</title>
+<style>
+:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#e8f2ff;background:#091324;color-scheme:dark}
+*{box-sizing:border-box}body{margin:0;padding:24px}main{max-width:1000px;margin:auto}h1{font-size:clamp(26px,5vw,42px);margin-bottom:8px}.muted,.small{color:#b4c2d7}.layout{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:24px 0}.card{background:#17263e;border:1px solid #344865;border-radius:18px;padding:22px}label{display:block;margin:15px 0 6px}input,select{width:100%;background:#0d1a30;color:white;padding:12px;border:1px solid #71839c;border-radius:9px;font-size:16px}.result{border-bottom:1px solid #3a4d67;padding:12px 0}.stat{font-size:29px;font-weight:800;color:#72e1b6}.small{font-size:13px;line-height:1.55}button{background:#74e3bc;color:#10281e;border:0;padding:13px 18px;border-radius:9px;font-weight:700;cursor:pointer;margin-top:16px}a{color:#8bd9ff}footer{line-height:1.6}@media(max-width:740px){.layout{grid-template-columns:1fr}body{padding:14px}}@media print{body{background:white;color:black}.card{background:white;color:black;border-color:#999}button{display:none}.stat{color:black}}
+</style></head>
+<body><main><h1>WW-calculator voor grensarbeiders</h1>
+<p class="muted">Wonen in Nederland · Werken in België · Volledige werkloosheid na ontslag</p>
+<div class="layout">
+<section class="card"><h2>Gegevens</h2>
+<label for="salary">Belgisch brutomaandloon (€)</label><input id="salary" type="number" min="0" step="50" value="2000">
+<label for="years">Meetellende arbeidsjaren (indicatief)</label><input id="years" type="number" min="0" max="50" value="10">
+<label for="hours">Uren per week</label><input id="hours" type="number" min="1" max="60" value="38">
+<label for="situation">Situatie</label><select id="situation"><option value="dismissal">Volledig ontslag / bedrijf sluit</option><option value="temporary">Tijdelijke werkloosheid</option></select>
+<button type="button" onclick="window.print()">Afdrukken / opslaan als PDF</button>
+</section>
+<section class="card" aria-live="polite"><h2>Verwachte uitkering</h2>
+<div class="result">Eerste twee maanden<div class="stat" id="first">—</div><span class="small">Indicatief bruto per maand (75%)</span></div>
+<div class="result">Vanaf maand drie<div class="stat" id="later">—</div><span class="small">Indicatief bruto per maand (70%)</span></div>
+<div class="result">Geschatte duur<div class="stat" id="duration">—</div></div>
+<div class="result">Totaal bruto over geschatte duur<div class="stat" id="total">—</div></div>
+<p id="warning" class="small"></p><p class="small"><strong>Netto:</strong> niet betrouwbaar vast te stellen met alleen het Belgische brutoloon. Nederlandse loonheffing en heffingskortingen, looncomponenten en overige inkomsten beïnvloeden de uitbetaling.</p>
+</section></div>
+<footer class="card"><h2>Belangrijke informatie</h2><p>Dit is een eenvoudige indicatie, geen UWV-berekening. Het UWV berekent het dagloon aan de hand van de toepasselijke referteperiode, buitenlandse looninformatie en het maximumdagloon. Ook vakantiegeld en vergoedingen kunnen gevolgen hebben. De daadwerkelijke WW-duur wordt vastgesteld uit het Nederlandse arbeidsverleden, inclusief relevante bijzondere en overgangsregels. De standaardduur loopt van 3 tot maximaal 24 maanden indien aan de voorwaarden is voldaan.</p><p>Bij volledige werkloosheid van iemand die gewoonlijk in Nederland woont en minimaal wekelijks terugkeert uit België, wordt WW doorgaans in Nederland aangevraagd. Vraag C4 en PD U1 aan; controleer bij een ontslagvergoeding de mogelijke gevolgen voor ingangsdatum en uitkering. Bij tijdelijke werkloosheid is de Belgische regeling doorgaans van toepassing.</p>
+<p><a href="https://www.uwv.nl/nl/ww">UWV</a> · <a href="https://www.rva.be/">RVA België</a> · <a href="https://www.grensinfo.nl/">Grensinfopunt</a></p><p class="small">Informatie voor 2026. Controleer de actuele officiële regels. Er worden geen persoonsgegevens verzonden of opgeslagen.</p>
+</footer></main>
+<script>
+const euro=n=>new Intl.NumberFormat('nl-NL',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(n);
+function calc(){
+const s=Math.max(0,Number(document.querySelector('#salary').value)||0);
+const y=Math.max(0,Number(document.querySelector('#years').value)||0);
+const tmp=document.querySelector('#situation').value==='temporary';
+const duration=y>=4?Math.min(24,Math.floor(Math.min(10,y)+Math.max(0,y-10)*.5)):3;
+const a=s*.75,b=s*.7;
+document.querySelector('#first').textContent=tmp?'Niet van toepassing':euro(a);
+document.querySelector('#later').textContent=tmp?'Niet van toepassing':euro(b);
+document.querySelector('#duration').textContent=tmp?'Belgische regeling':duration+' maanden*';
+document.querySelector('#total').textContent=tmp?'—':euro(Math.min(duration,2)*a+Math.max(0,duration-2)*b);
+document.querySelector('#warning').textContent=tmp?'Bij tijdelijke werkloosheid kan de Belgische regeling gelden. Deze calculator is alleen bedoeld voor volledige werkloosheid.':'* De duur is een grove benadering. De eerste 10 arbeidsjaren tellen doorgaans elk voor een maand; boven 10 jaar kan de opbouw afwijken door overgangsrecht. Het bruto bedrag houdt geen rekening met het maximumdagloon of de precieze dagloonberekening.';
+}
+document.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',calc));calc();
+</script></body></html>
