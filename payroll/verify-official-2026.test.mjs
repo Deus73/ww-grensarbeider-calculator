@@ -1,0 +1,12 @@
+import {strict as assert} from "node:assert";
+import {verifyOfficialCases} from "./verify-official-2026.mjs";
+const source={url:"https://www.belastingdienst.nl/example",document:"SYNTHETISCHE TESTCASE, NIET OFFICIEEL",page:"1",date:"2026-10-30"};
+const input={wage:2500,period:"maand",residence:"NL",type:"wit",insurance:"VOLLEDIG",credit:true};
+const table={groups:new Map(),source};
+assert.throws(()=>verifyOfficialCases(table,[]),/Geen onafhankelijke/);
+assert.throws(()=>verifyOfficialCases(table,[{input,expectedCents:30000}]),/controleerbare/);
+const report=verifyOfficialCases(table,[{input,expectedCents:30000,source}]);
+assert.equal(report.passed,0);
+assert.equal(report.results[0].status,"missing-table");
+assert.equal(report.results[0].pass,false);
+console.log("5 fail-closed validatiecontroles geslaagd; geen officiële bedragen geverifieerd.");
