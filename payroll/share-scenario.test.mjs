@@ -1,0 +1,15 @@
+import {strict as assert} from "node:assert";
+import {encodePayrollScenario,decodePayrollScenario} from "./share-scenario.mjs";
+const scenario={wage:3000.55,period:"maand",residence:"BE",type:"wit",insurance:"VOLLEDIG",credit:false};
+const query=encodePayrollScenario(scenario);
+assert.deepEqual(decodePayrollScenario(query),scenario);
+assert.deepEqual(decodePayrollScenario("?"+query),scenario);
+assert.ok(query.includes("residence=BE"));
+assert.throws(()=>encodePayrollScenario({...scenario,wage:-1}),/Ongeldig loon/);
+assert.throws(()=>encodePayrollScenario({...scenario,wage:100.001}),/Ongeldig loon/);
+assert.throws(()=>encodePayrollScenario({...scenario,insurance:"a&credit=true"}),/verzekeringscode/);
+assert.throws(()=>decodePayrollScenario(query+"&wage=1"),/deellink/);
+assert.throws(()=>decodePayrollScenario(query+"&email=test"),/deellink/);
+assert.throws(()=>decodePayrollScenario(query.replace("3000.55","3e3")),/Ongeldig loon/);
+assert.throws(()=>decodePayrollScenario(query.replace("credit=false","credit=yes")),/loonheffingskorting/);
+console.log("10 deellinkcontroles geslaagd.");
