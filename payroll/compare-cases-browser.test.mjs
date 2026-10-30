@@ -1,0 +1,16 @@
+import {strict as assert} from "node:assert";
+import {makeTable} from "./nl-2026-table-engine.mjs";
+import {comparePayrollCases} from "./compare-cases-browser.mjs";
+const source={url:"https://www.belastingdienst.nl/test",document:"Synthetische fixture",date:"2026-10-30"};
+const table=makeTable([{year:2026,period:"maand",residence:"NL",type:"wit",insurance:"VOLLEDIG",credit:true,lower:0,upper:5000,withholding:125.50}],source);
+const input={wage:3000,period:"maand",residence:"NL",type:"wit",insurance:"VOLLEDIG",credit:true};
+const ref={input,expectedCents:12550,source:{...source,page:"fixture-1"}};
+assert.equal(comparePayrollCases(table,[ref]).passed,1);
+assert.equal(comparePayrollCases(table,[{...ref,expectedCents:12551}]).failed,1);
+assert.equal(comparePayrollCases(table,[{...ref,input:{...input,wage:6000}}]).results[0].status,"missing-row");
+assert.throws(()=>comparePayrollCases(table,[]),/Geen referentiecases/);
+assert.throws(()=>comparePayrollCases(table,[ref,ref]),/Dubbele/);
+assert.throws(()=>comparePayrollCases(table,[{...ref,source:{...source}}]),/bron/);
+assert.throws(()=>comparePayrollCases(table,[{...ref,expectedCents:-1}]),/Ongeldige/);
+assert.equal(comparePayrollCases(table,[ref]).verified,false);
+console.log("8 browser-referentiecontroles geslaagd; uitsluitend synthetische bedragen.");
