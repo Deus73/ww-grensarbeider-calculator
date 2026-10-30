@@ -20,7 +20,7 @@ export function validateRow(row) {
   return Object.freeze({...row});
 }
 export function makeTable(rows, source) {
-  if (!source || !/^https:\/\/(www\.)?belastingdienst\.nl\//.test(source.url || "") || !source.document || !source.date) throw new Error("Controleerbare Belastingdienst-bron vereist");
+  if (!source || !/^https:\/\/(www\.)?belastingdienst\.nl\//.test(source.url || "") || !source.document || !/^2026-(0[1-9]|1[0-2])-([0-2][0-9]|3[01])$/.test(source.date||"") || Number.isNaN(Date.parse(source.date))) throw new Error("Controleerbare Belastingdienst-bron en geldige datum vereist");
   if (!Array.isArray(rows) || rows.length === 0) throw new Error("Geen tabelgegevens aangeleverd");
   const clean = rows.map(validateRow);
   const key = r => [r.year,r.period,r.residence,r.type,r.insurance,r.credit].join("|");
