@@ -1,5 +1,5 @@
 import {strict as assert} from "node:assert";
-import {makeTable,lookupWithholding,auditTableCoverage} from "./nl-2026-table-engine.mjs";
+import {makeTable,lookupWithholding,auditTableCoverage,isBelastingdienstSourceUrl} from "./nl-2026-table-engine.mjs";
 const source={url:"https://www.belastingdienst.nl/wps/wcm/connect/nl/personeel-en-loon/content/hulpmiddel-loonbelastingtabellen",document:"Testfixture, NIET officiële tabelwaarden",date:"2026-10-30"};
 // These are synthetic fixtures testing lookup mechanics only, not tax correctness.
 const rows=[
@@ -29,4 +29,10 @@ assert.equal(audit.present,1);
 assert.equal(audit.missing,1);
 assert.equal(audit.results[0].rows,2);
 assert.equal(audit.results[1].lastWage,null);
-console.log("16 adapter- en dekkingscontroles geslaagd; synthetische waarden zijn NIET officieel.");
+assert.equal(table.verifiedOfficial,false);
+assert.equal(isBelastingdienstSourceUrl("https://download.belastingdienst.nl/belastingdienst/docs/tabel.pdf"),true);
+assert.equal(isBelastingdienstSourceUrl("https://www.belastingdienst.nl/tabellen"),true);
+for(const bad of ["http://www.belastingdienst.nl/tabel","https://belastingdienst.nl.evil.test/tabel","https://www.belastingdienst.nl@evil.test/tabel","https://evil.test/belastingdienst.nl/tabel","https://www.belastingdienst.nl:444/tabel","javascript:alert(1)"])assert.equal(isBelastingdienstSourceUrl(bad),false,bad);
+assert.throws(()=>makeTable(rows,{...source,url:"https://www.belastingdienst.nl.evil.test/tabel"}),/Belastingdienst/);
+assert.equal(makeTable(rows,{...source,url:"https://download.belastingdienst.nl/belastingdienst/docs/tabel.pdf"}).verifiedOfficial,false);
+console.log("27 adapter- en dekkingscontroles geslaagd; synthetische waarden zijn NIET officieel.");
