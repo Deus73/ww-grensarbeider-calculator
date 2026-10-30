@@ -8,6 +8,7 @@ export const RESIDENCES = Object.freeze(["NL","BE","EU_EER_CH_BES","DERDE_LAND",
 export const TYPES = Object.freeze(["wit","groen"]);
 const finite = n => typeof n === "number" && Number.isFinite(n);
 const cents = n => Math.round((n + Number.EPSILON) * 100);
+const exactCents = n => finite(n) && Math.abs(n * 100 - Math.round(n * 100)) < 1e-7;
 export function validateRow(row) {
   if (!row || typeof row !== "object") throw new Error("Ongeldige tabelrij");
   for (const field of ["year","period","residence","type","insurance","credit","lower","upper","withholding"]) {
@@ -15,7 +16,7 @@ export function validateRow(row) {
   }
   if (row.year !== 2026 || !PERIODS.includes(row.period) || !RESIDENCES.includes(row.residence) || !TYPES.includes(row.type)) throw new Error("Ongeldige tabelidentificatie");
   if (typeof row.insurance !== "string" || !row.insurance || typeof row.credit !== "boolean") throw new Error("Verzekering of loonheffingskorting ontbreekt");
-  if (![row.lower,row.upper,row.withholding].every(finite) || row.lower < 0 || row.upper <= row.lower || row.withholding < 0) throw new Error("Ongeldig looninterval of inhouding");
+  if (![row.lower,row.upper,row.withholding].every(exactCents) || row.lower < 0 || row.upper <= row.lower || row.withholding < 0) throw new Error("Ongeldig looninterval of inhouding");
   return Object.freeze({...row});
 }
 export function makeTable(rows, source) {
@@ -27,13 +28,16 @@ export function makeTable(rows, source) {
   for (const row of clean) {const k=key(row);if(!groups.has(k)) groups.set(k,[]);groups.get(k).push(row);}
   for (const group of groups.values()) {
     group.sort((a,b)=>a.lower-b.lower);
-    for (let i=1;i<group.length;i++) if (group[i].lower < group[i-1].upper) throw new Error("Overlappende loonintervallen");
+    for (let i=1;i<group.length;i++) {
+      if (cents(group[i].lower) < cents(group[i-1].upper)) throw new Error("Overlappende loonintervallen");
+      if (cents(group[i].lower) > cents(group[i-1].upper)) throw new Error("Ontbrekend looninterval in tabel");
+    }
   }
   return Object.freeze({source:Object.freeze({...source}),groups});
 }
 export function lookupWithholding(table, input) {
   if (!table || !table.groups) throw new Error("Geen gevalideerde tabel geladen");
-  if (!finite(input.wage) || input.wage < 0) throw new Error("Ongeldig tijdvakloon");
+  if (!exactCents(input.wage) || input.wage < 0) throw new Error("Ongeldig tijdvakloon");
   if (input.special === true) return {status:"unsupported",reason:"Gebruik officiële tabel bijzondere beloningen"};
   if (input.anonymous === true) return {status:"unsupported",reason:"Anoniementarief vereist aparte regels"};
   if (!PERIODS.includes(input.period) || !RESIDENCES.includes(input.residence) || !TYPES.includes(input.type) || typeof input.credit!=="boolean" || !input.insurance) return {status:"unsupported",reason:"Onvolledige tabelselectie"};
