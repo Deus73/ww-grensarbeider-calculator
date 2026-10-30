@@ -1,0 +1,155 @@
+[
+  {
+    "input": {
+      "wage": 670.5,
+      "period": "maand",
+      "residence": "NL",
+      "type": "wit",
+      "insurance": "VOLLEDIG",
+      "credit": false
+    },
+    "expectedCents": 23967,
+    "source": {
+      "url": "https://download.belastingdienst.nl/belastingdienst/dl/rekenhulpen/loonheffing/2026/v01/pdf/wit_mnd_nl_std_20260101.pdf",
+      "document": "Witte maandtabel NL standaard 2026, jonger dan AOW-leeftijd, zonder loonheffingskorting",
+      "page": "rij tabelloon 670.50",
+      "date": "2026-01-01"
+    }
+  },
+  {
+    "input": {
+      "wage": 675,
+      "period": "maand",
+      "residence": "NL",
+      "type": "wit",
+      "insurance": "VOLLEDIG",
+      "credit": false
+    },
+    "expectedCents": 24125,
+    "source": {
+      "url": "https://download.belastingdienst.nl/belastingdienst/dl/rekenhulpen/loonheffing/2026/v01/pdf/wit_mnd_nl_std_20260101.pdf",
+      "document": "Witte maandtabel NL standaard 2026, jonger dan AOW-leeftijd, zonder loonheffingskorting",
+      "page": "rij tabelloon 675.00",
+      "date": "2026-01-01"
+    }
+  },
+  {
+    "input": {
+      "wage": 679.5,
+      "period": "maand",
+      "residence": "NL",
+      "type": "wit",
+      "insurance": "VOLLEDIG",
+      "credit": false
+    },
+    "expectedCents": 24292,
+    "source": {
+      "url": "https://download.belastingdienst.nl/belastingdienst/dl/rekenhulpen/loonheffing/2026/v01/pdf/wit_mnd_nl_std_20260101.pdf",
+      "document": "Witte maandtabel NL standaard 2026, jonger dan AOW-leeftijd, zonder loonheffingskorting",
+      "page": "rij tabelloon 679.50",
+      "date": "2026-01-01"
+    }
+  },
+  {
+    "input": {
+      "wage": 684,
+      "period": "maand",
+      "residence": "NL",
+      "type": "wit",
+      "insurance": "VOLLEDIG",
+      "credit": false
+    },
+    "expectedCents": 24450,
+    "source": {
+      "url": "https://download.belastingdienst.nl/belastingdienst/dl/rekenhulpen/loonheffing/2026/v01/pdf/wit_mnd_nl_std_20260101.pdf",
+      "document": "Witte maandtabel NL standaard 2026, jonger dan AOW-leeftijd, zonder loonheffingskorting",
+      "page": "rij tabelloon 684.00",
+      "date": "2026-01-01"
+    }
+  },
+  {
+    "input": {
+      "wage": 688.5,
+      "period": "maand",
+      "residence": "NL",
+      "type": "wit",
+      "insurance": "VOLLEDIG",
+      "credit": false
+    },
+    "expectedCents": 24608,
+    "source": {
+      "url": "https://download.belastingdienst.nl/belastingdienst/dl/rekenhulpen/loonheffing/2026/v01/pdf/wit_mnd_nl_std_20260101.pdf",
+      "document": "Witte maandtabel NL standaard 2026, jonger dan AOW-leeftijd, zonder loonheffingskorting",
+      "page": "rij tabelloon 688.50",
+      "date": "2026-01-01"
+    }
+  },
+  {
+    "input": {
+      "wage": 693,
+      "period": "maand",
+      "residence": "NL",
+      "type": "wit",
+      "insurance": "VOLLEDIG",
+      "credit": false
+    },
+    "expectedCents": 24767,
+    "source": {
+      "url": "https://download.belastingdienst.nl/belastingdienst/dl/rekenhulpen/loonheffing/2026/v01/pdf/wit_mnd_nl_std_20260101.pdf",
+      "document": "Witte maandtabel NL standaard 2026, jonger dan AOW-leeftijd, zonder loonheffingskorting",
+      "page": "rij tabelloon 693.00",
+      "date": "2026-01-01"
+    }
+  },
+  {
+    "input": {
+      "wage": 697.5,
+      "period": "maand",
+      "residence": "NL",
+      "type": "wit",
+      "insurance": "VOLLEDIG",
+      "credit": false
+    },
+    "expectedCents": 24933,
+    "source": {
+      "url": "https://download.belastingdienst.nl/belastingdienst/dl/rekenhulpen/loonheffing/2026/v01/pdf/wit_mnd_nl_std_20260101.pdf",
+      "document": "Witte maandtabel NL standaard 2026, jonger dan AOW-leeftijd, zonder loonheffingskorting",
+      "page": "rij tabelloon 697.50",
+      "date": "2026-01-01"
+    }
+  },
+  {
+    "input": {
+      "wage": 702,
+      "period": "maand",
+      "residence": "NL",
+      "type": "wit",
+      "insurance": "VOLLEDIG",
+      "credit": false
+    },
+    "expectedCents": 25092,
+    "source": {
+      "url": "https://download.belastingdienst.nl/belastingdienst/dl/rekenhulpen/loonheffing/2026/v01/pdf/wit_mnd_nl_std_20260101.pdf",
+      "document": "Witte maandtabel NL standaard 2026, jonger dan AOW-leeftijd, zonder loonheffingskorting",
+      "page": "rij tabelloon 702.00",
+      "date": "2026-01-01"
+    }
+  },
+  {
+    "input": {
+      "wage": 706.5,
+      "period": "maand",
+      "residence": "NL",
+      "type": "wit",
+      "insurance": "VOLLEDIG",
+      "credit": false
+    },
+    "expectedCents": 25250,
+    "source": {
+      "url": "https://download.belastingdienst.nl/belastingdienst/dl/rekenhulpen/loonheffing/2026/v01/pdf/wit_mnd_nl_std_20260101.pdf",
+      "document": "Witte maandtabel NL standaard 2026, jonger dan AOW-leeftijd, zonder loonheffingskorting",
+      "page": "rij tabelloon 706.50",
+      "date": "2026-01-01"
+    }
+  }
+]
