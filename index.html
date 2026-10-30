@@ -44,7 +44,8 @@ function payrollRegression2026(){
  ['Belastingdienst voorbeeld 2026: 80000 jaarloon, zonder kortingen',salary.calc({...base,gross:80000/12},{...blank,auto:1}).value,money(80000/12-(38883*.3575+(78426-38883)*.3756+(80000-78426)*.495)/12)],
  ['NL eerste schijf bovengrens 38883',salary.calc({...base,gross:38883/12},{...blank,auto:1}).value,money(38883/12-38883*.3575/12)],
  ['NL tweede schijf bovengrens 78426',salary.calc({...base,gross:78426/12},{...blank,auto:1}).value,money(78426/12-(38883*.3575+(78426-38883)*.3756)/12)],
- ['NL nul bruto, met kortingen',salary.calc({...base,gross:0},blank).value,money(0)]
+ ['NL nul bruto, met kortingen',salary.calc({...base,gross:0},blank).value,money(0)],
+ ['Negatieve fiscale inhouding wordt afgewezen',salary.calc(base,{...blank,auto:0,tax:-5}).value,'—']
  ];
  return cases.map(([name,actual,expected])=>({name,actual,expected,pass:actual===expected}));
 }
