@@ -7,6 +7,7 @@ import {makeTable} from "./nl-2026-table-engine.mjs";
 export const CSV_COLUMNS=["year","period","residence","type","insurance","credit","lower","upper","withholding"];
 export function parsePayrollCsv(csv,source) {
   if (typeof csv!=="string" || !csv.trim()) throw new Error("Leeg CSV-bestand");
+  if(csv.length>20_000_000) throw new Error("CSV-bestand groter dan 20 MB: import geweigerd");
   const normalized=csv.replace(/^\uFEFF/,"");
   const firstLine=normalized.split(/\r?\n/,1)[0];
   const delimiter=firstLine.includes(";")?";":",";
