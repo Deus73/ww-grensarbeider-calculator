@@ -25,7 +25,7 @@ export function parsePayrollCsv(csv,source) {
       if(c==="\r"&&normalized[i+1]==="\n")i++;
       record.push(field.trim());
       if(record.some(v=>v!==""))records.push(record);
-      record=[];field="";closed=false;
+      record=[];field="";closed=false;started=false;
     } else {
       if(closed&&!/\s/.test(c))throw new Error("Tekst na afsluitend aanhalingsteken");
       field+=c;started=true;
