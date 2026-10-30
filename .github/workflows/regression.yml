@@ -24,6 +24,8 @@ jobs:
         run: node payroll/nl-2026-table-engine.test.mjs
       - name: Controleer CSV-import loonbelastingtabellen
         run: node payroll/import-nl-2026-csv.test.mjs
+      - name: Controleer referentiecases in browsermodule
+        run: node payroll/compare-cases-browser.test.mjs
       - name: Controleer onafhankelijke validatie-fail-closed
         run: node payroll/verify-official-2026.test.mjs
       - name: Controleer ingebouwde calculatorregressies
