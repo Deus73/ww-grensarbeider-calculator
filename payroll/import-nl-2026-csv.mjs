@@ -9,7 +9,7 @@ export function parsePayrollCsv(csv,source) {
   if (typeof csv!=="string" || !csv.trim()) throw new Error("Leeg CSV-bestand");
   if(csv.length>20_000_000) throw new Error("CSV-bestand groter dan 20 MB: import geweigerd");
   const normalized=csv.replace(/^\uFEFF/,"");
-  const firstLine=normalized.split(/\r?\n/,1)[0];
+  const firstLine=normalized.split(/[\r\n]/,1)[0];
   const delimiter=firstLine.includes(";")?";":",";
   const records=[];let record=[],field="",quoted=false,closed=false,started=false;
   for(let i=0;i<normalized.length;i++){
@@ -40,6 +40,7 @@ export function parsePayrollCsv(csv,source) {
   if(!lines.length) throw new Error("CSV-kopregel ontbreekt");
   const header=split(lines.shift());
   if (header.length!==CSV_COLUMNS.length || new Set(header).size!==header.length || CSV_COLUMNS.some(c=>!header.includes(c))) throw new Error("CSV-kolommen komen niet overeen met het vereiste schema");
+  if(!lines.length) throw new Error("CSV bevat geen loonbelastingregels");
   const rows=lines.map((line,i)=>{
     const values=split(line);
     if(values.length!==header.length) throw new Error("Ongeldig aantal kolommen op regel "+(i+2));
