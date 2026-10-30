@@ -32,3 +32,17 @@ Vijf extra controles rechtstreeks op de `salary.calc()`-functie uitgevoerd; **5/
 | NL, bruto EUR 15.000/maand, kortingen uitgefaseerd | EUR 8.413,99 | EUR 8.413,99 | OK |
 
 **Let op:** dit zijn wiskundige regressietests tegen de geïmplementeerde vereenvoudigde jaarformules, geen onafhankelijke vergelijking met de officiële maandtabellen. De Belgische bedrijfsvoorheffing, volledige NL-loonbelastingtabellen en grensarbeidersherleiding zijn niet geïmplementeerd. Bronnen: https://www.belastingdienst.nl/wps/wcm/connect/nl/voorlopige-aanslag/content/voorlopige-aanslag-tarieven-en-heffingskortingen en https://financien.belgium.be/nl/ondernemingen/personeel_en_loon/bedrijfsvoorheffing/berekening
+
+
+## Aanvullende controles v3.3 – 30 oktober 2026
+
+Zes scenario's uitgevoerd tegen de huidige `salary.calc()` functie. **6/6 functioneel geslaagd**. Bij twee vergelijkingen is de valutaweergave genormaliseerd (niet-afbrekende spatie tegenover gewone spatie); de numerieke bedragen kwamen overeen.
+
+- NL 40 jaar, EUR 3000 bruto, met heffingskortingen: EUR 2611,85 (indicatie).
+- NL 40 jaar, EUR 3000 bruto, zonder heffingskortingen: EUR 1927,50 (indicatie).
+- NL 67 jaar: automatische berekening geblokkeerd.
+- Wonen België, werken Nederland: automatische berekening geblokkeerd.
+- Werken België: automatische Nederlandse berekening geblokkeerd.
+- Handmatige modus zonder fiscale inhouding: geen nettobedrag.
+
+Dit is **geen** vergelijking met officiële Nederlandse tijdvaktabellen of Belgische sleutelformule. Die volledige rekenmotoren zijn nog niet geïmplementeerd.
