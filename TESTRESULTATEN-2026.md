@@ -46,3 +46,12 @@ Zes scenario's uitgevoerd tegen de huidige `salary.calc()` functie. **6/6 functi
 - Handmatige modus zonder fiscale inhouding: geen nettobedrag.
 
 Dit is **geen** vergelijking met officiële Nederlandse tijdvaktabellen of Belgische sleutelformule. Die volledige rekenmotoren zijn nog niet geïmplementeerd.
+
+
+## Ingebouwd testdashboard v3.4
+
+URL: https://deus73.github.io/ww-grensarbeider-calculator/?test=1
+
+Zes regressietests op de actuele calculatorfuncties uitgevoerd: **6/6 geslaagd**. Getest: NL 3000 bruto met en zonder heffingskortingen, blokkering woonland BE, blokkering werkland BE, blokkering leeftijd 67+, en ontbrekende handmatige inhouding. Het dashboard toont resultaten rechtstreeks in de browser. Deze regressies bewijzen **niet** dat de bruto-netto-uitkomst gelijk is aan de officiële Nederlandse loonbelastingtabellen of de Belgische sleutelformule.
+
+Officiële bronnen 2026: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/themaoverstijgend/brochures_en_publicaties/rekenvoorschriften-voor-de-geautomatiseerde-loonadministratie ; https://financien.belgium.be/nl/ondernemingen/personeel_en_loon/bedrijfsvoorheffing/berekening
