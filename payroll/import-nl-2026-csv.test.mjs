@@ -17,4 +17,5 @@ assert.throws(()=>parsePayrollCsv(header+'\n2026;"maand;NL;wit;VOLLEDIG;true;0;2
 assert.throws(()=>parsePayrollCsv(header+'\n2026;"maand"x;NL;wit;VOLLEDIG;true;0;2000;100',source),/Tekst na/);
 assert.throws(()=>parsePayrollCsv(header+"\n2026;maand;NL;wit;VOLLEDIG;true;0;2000;100".repeat(500000),source),/20 MB/);
 assert.throws(()=>parsePayrollCsv(header+"\n2026;maand;NL;wit;VOLLEDIG;true;0;2000;100\n2026;maand;NL;wit;VOLLEDIG;true;0;2000;100",source),/Overlappende/);
-console.log("11 CSV-importcontroles geslaagd; alle testbedragen zijn synthetisch.");
+assert.throws(()=>parsePayrollCsv(header,source),/geen loonbelastingregels/);
+console.log("12 CSV-importcontroles geslaagd; alle testbedragen zijn synthetisch.");
