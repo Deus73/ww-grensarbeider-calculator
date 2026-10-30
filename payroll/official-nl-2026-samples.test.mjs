@@ -1,0 +1,17 @@
+import {strict as assert} from "node:assert";
+import {readFileSync} from "node:fs";
+import {makeTable} from "./nl-2026-table-engine.mjs";
+import {comparePayrollCases} from "./compare-cases-browser.mjs";
+const cases=JSON.parse(readFileSync(new URL("./official-nl-2026-sample-cases.json",import.meta.url),"utf8"));
+assert.equal(cases.length,9);
+assert.deepEqual(cases.map(x=>x.expectedCents),[23967,24125,24292,24450,24608,24767,24933,25092,25250]);
+assert.ok(cases.every(x=>x.source.url.startsWith("https://download.belastingdienst.nl/")));
+assert.ok(cases.every(x=>x.input.period==="maand"&&x.input.residence==="NL"&&x.input.credit===false));
+const source={url:"https://www.belastingdienst.nl/test",document:"TEST synthetic",date:"2026-10-30"};
+const rows=cases.map((x,i)=>({...x.input,year:2026,lower:x.input.wage,upper:i===cases.length-1?x.input.wage+4.5:cases[i+1].input.wage,withholding:x.expectedCents/100}));
+const table=makeTable(rows,source);
+const report=comparePayrollCases(table,cases);
+assert.equal(report.passed,9);
+assert.equal(report.verified,false);
+assert.equal(comparePayrollCases(table,[{...cases[0],expectedCents:1}]).failed,1);
+console.log("7 officiële referentiefixture-controles geslaagd; tabelwaarden zijn bronrijen, geen volledig dekkende fiscale tabel.");
