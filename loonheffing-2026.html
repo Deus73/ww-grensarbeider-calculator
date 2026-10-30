@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>NL loonbelastingtabellen 2026 | GrensCalc</title>
+<style>:root{font-family:system-ui,sans-serif;color-scheme:dark;background:#081427;color:#eff6ff}*{box-sizing:border-box}body{max-width:1000px;margin:auto;padding:24px}h1{font-size:clamp(25px,4vw,38px)}.card{background:#152640;border:1px solid #365675;border-radius:14px;padding:20px;margin:16px 0}label{display:block;margin:12px 0 5px}input,select,button{background:#0b1a30;color:white;border:1px solid #7594ae;border-radius:8px;padding:10px;font:inherit;width:100%}button{background:#187568;cursor:pointer;margin-top:15px;font-weight:bold}button:disabled{opacity:.5;cursor:not-allowed}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.muted{color:#b7c9db}.warning{background:#453321;border-left:4px solid #ffcc82;padding:12px;border-radius:6px}.success{color:#91f4cd}a{color:#a4dfff}output{display:block;white-space:pre-wrap;overflow-wrap:anywhere}small{line-height:1.5}@media(max-width:600px){.grid{grid-template-columns:1fr}body{padding:12px}}</style></head><body>
+<p><a href="./index.html">← Terug naar GrensCalc</a></p>
+<h1>Nederlandse loonbelastingtabellen 2026</h1>
+<p class="warning">Deze functie gebruikt uitsluitend zelf ingeladen, vooraf gecontroleerde tabelregels. Er worden <strong>geen officiële tabellen meegeleverd</strong>. Controleer bron en volledigheid. Geen fiscale validatie of automatische herleiding.</p>
+<section class="card"><h2>1. Laad tabelgegevens</h2>
+<p class="muted">CSV-kolommen: year;period;residence;type;insurance;credit;lower;upper;withholding. Decimaalteken: punt. Alleen 2026. Geen gegevens worden verzonden of opgeslagen.</p>
+<label for="file">CSV-bestand (maximaal 20 MB)</label><input id="file" type="file" accept=".csv,text/csv">
+<div class="grid"><div><label for="source">Bron-URL (belastingdienst.nl)</label><input id="source" type="url" placeholder="https://www.belastingdienst.nl/..."></div><div><label for="document">Naam officiële tabel / document</label><input id="document" placeholder="Bijv. witte maandtabel 2026"></div><div><label for="date">Bronversie of raadpleegdatum in 2026</label><input id="date" type="date" min="2026-01-01" max="2026-12-31"></div></div>
+<button id="load">Controleer en laad CSV</button><output id="loadResult" aria-live="polite"></output></section>
+<section class="card"><h2>2. Zoek loonheffing op</h2>
+<div class="grid"><div><label for="wage">Tijdvakloon (€)</label><input id="wage" type="number" min="0" step=".01" value="3000"></div>
+<div><label for="period">Loontijdvak</label><select id="period"><option value="maand">Maand</option><option value="week">Week</option><option value="vierweken">Vier weken</option><option value="dag">Dag</option><option value="kwartaal">Kwartaal</option><option value="jaar">Jaar</option></select></div>
+<div><label for="residence">Woonlandcategorie</label><select id="residence"><option value="NL">Nederland</option><option value="BE">België</option><option value="EU_EER_CH_BES">Overig EU/EER/Zwitserland/BES</option><option value="DERDE_LAND">Derde land</option><option value="ARUBA_SURINAME">Aruba/Suriname</option></select></div>
+<div><label for="type">Tabel</label><select id="type"><option value="wit">Wit</option><option value="groen">Groen</option></select></div>
+<div><label for="insurance">Verzekeringscode (exact als CSV)</label><input id="insurance" value="VOLLEDIG"></div>
+<div><label for="credit">Loonheffingskorting</label><select id="credit"><option value="true">Ja</option><option value="false">Nee</option></select></div>
+<div><label><input id="special" type="checkbox" style="width:auto"> Bijzondere beloning</label></div><div><label><input id="anonymous" type="checkbox" style="width:auto"> Anoniementarief</label></div></div>
+<button id="calculate" disabled>Zoek in ingeladen tabel</button><output id="result" aria-live="polite"></output></section>
+<p><small>Bronnen: <a href="https://www.belastingdienst.nl/wps/wcm/connect/nl/personeel-en-loon/content/hulpmiddel-loonbelastingtabellen">loonbelastingtabellen</a> en <a href="https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/themaoverstijgend/brochures_en_publicaties/rekenvoorschriften-voor-de-geautomatiseerde-loonadministratie">rekenvoorschriften</a>. Geïmporteerde bedragen zijn niet automatisch geverifieerd.</small></p>
+<script type="module">
+import {parsePayrollCsv} from "./payroll/import-nl-2026-csv.mjs";
+import {lookupWithholding,auditTableCoverage} from "./payroll/nl-2026-table-engine.mjs";
+const $=id=>document.getElementById(id), money=n=>new Intl.NumberFormat("nl-NL",{style:"currency",currency:"EUR"}).format(n);
+let table=null;
+$("load").addEventListener("click",async()=>{
+ table=null;$("calculate").disabled=true;$("result").textContent="";
+ try{
+ const file=$("file").files[0];if(!file)throw Error("Selecteer eerst een CSV-bestand.");
+ if(file.size>20_000_000)throw Error("Bestand is groter dan 20 MB.");
+ const source={url:$("source").value.trim(),document:$("document").value.trim(),date:$("date").value};
+ table=parsePayrollCsv(await file.text(),source);
+ const groups=[...table.groups.values()],total=groups.reduce((n,g)=>n+g.length,0);
+ $("loadResult").textContent="CSV geladen: "+groups.length+" tabelcombinaties, "+total+" regels. Dit bevestigt niet dat de tabellen officieel of volledig zijn.";
+ $("calculate").disabled=false;
+ }catch(e){$("loadResult").textContent="Import geweigerd: "+e.message;}
+});
+$("calculate").addEventListener("click",()=>{
+ if(!table)return;
+ try{
+ const input={wage:Number($("wage").value),period:$("period").value,residence:$("residence").value,type:$("type").value,insurance:$("insurance").value.trim(),credit:$("credit").value==="true",special:$("special").checked,anonymous:$("anonymous").checked};
+ if($("wage").value.trim()==="")throw Error("Vul het tijdvakloon in.");
+ const result=lookupWithholding(table,input);
+ if(result.status!=="ok"){$("result").textContent="Geen berekening: "+result.reason;return;}
+ const coverage=auditTableCoverage(table,[input]).results[0];
+ $("result").textContent="Ingehouden loonheffing volgens geïmporteerde tabel: "+money(result.withholding)+"\nGematcht looninterval: "+money(result.matchedRange[0])+" tot "+money(result.matchedRange[1])+" (exclusief bovengrens)\nBron: "+result.source.document+" ("+result.source.date+")\n"+coverage.reason;
+ }catch(e){$("result").textContent="Berekening geweigerd: "+e.message;}
+});
+</script></body></html>
