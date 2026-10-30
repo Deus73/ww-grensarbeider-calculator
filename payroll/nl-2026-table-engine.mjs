@@ -61,7 +61,7 @@ export function auditTableCoverage(table, requirements) {
     if (!req || !PERIODS.includes(req.period) || !RESIDENCES.includes(req.residence) || !TYPES.includes(req.type) || typeof req.credit!=="boolean" || typeof req.insurance!=="string" || !req.insurance) throw new Error("Ongeldige tabelcombinatie");
     const key=[2026,req.period,req.residence,req.type,req.insurance,req.credit].join("|");
     const rows=table.groups.get(key);
-    return Object.freeze({key,present:!!rows,rows:rows?.length??0,firstWage:rows?.[0]?.lower??null,lastWage:rows?.[rows.length-1]?.upper??null});
+    return Object.freeze({key,present:!!rows,rows:rows?.length??0,firstWage:rows?.[0]?.lower??null,lastWage:rows?.[rows.length-1]?.upper??null,coverageComplete:false,reason:"Zonder officiële grenswaarden en bronvergelijking is volledige dekking niet aantoonbaar"});
   });
   return Object.freeze({required:results.length,present:results.filter(r=>r.present).length,missing:results.filter(r=>!r.present).length,results});
 }
