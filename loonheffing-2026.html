@@ -54,8 +54,8 @@ $("compare").addEventListener("click",async()=>{
  if(file.size>2_000_000)throw Error("JSON groter dan 2 MB.");
  const cases=JSON.parse(await file.text());
  const report=comparePayrollCases(table,cases);
- const failures=report.results.filter(r=>!r.pass).slice(0,20).map(r=>"Case "+r.case+": verwacht "+r.expectedCents+" cent, gevonden "+(r.actualCents??r.status)).join("\\n");
- $("comparison").textContent=report.passed+"/"+report.total+" referentiecases komen overeen. "+report.failed+" afwijkingen.\\n"+report.notice+(failures?"\\n"+failures:"");
+ const failures=report.results.filter(r=>!r.pass).slice(0,20).map(r=>"Case "+r.case+": verwacht "+r.expectedCents+" cent, gevonden "+(r.actualCents??r.status)).join("\n");
+ $("comparison").textContent=report.passed+"/"+report.total+" referentiecases komen overeen. "+report.failed+" afwijkingen.\n"+report.notice+(failures?"\n"+failures:"");
  }catch(e){$("comparison").textContent="Vergelijking geweigerd: "+e.message;}
 });
 </script></body></html>
