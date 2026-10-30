@@ -11,4 +11,8 @@ assert.throws(()=>parsePayrollCsv(header+"\n2026;maand;NL;wit;VOLLEDIG;ja;0;2000
 assert.throws(()=>parsePayrollCsv(header+"\n2026;maand;NL;wit;VOLLEDIG;true;0;2000",source),/kolommen/);
 assert.throws(()=>parsePayrollCsv(header+"\n2026;maand;NL;wit;VOLLEDIG;true;0;2000;100\n2026;maand;NL;wit;VOLLEDIG;true;1999;3000;200",source),/Overlappende/);
 assert.throws(()=>parsePayrollCsv("year;period\n2026;maand",source),/kolommen/);
-console.log("6 CSV-importcontroles geslaagd; alle testbedragen zijn synthetisch.");
+const quoted=parsePayrollCsv('"year";"period";"residence";"type";"insurance";"credit";"lower";"upper";"withholding"\n2026;"maand";"NL";"wit";"VOLLEDIG";"true";0;2000;100',source);
+assert.equal(lookupWithholding(quoted,{wage:1500,period:"maand",residence:"NL",type:"wit",insurance:"VOLLEDIG",credit:true}).withholding,100);
+assert.throws(()=>parsePayrollCsv(header+'\n2026;"maand;NL;wit;VOLLEDIG;true;0;2000;100',source),/Niet-afgesloten/);
+assert.throws(()=>parsePayrollCsv(header+'\n2026;"maand"x;NL;wit;VOLLEDIG;true;0;2000;100',source),/Tekst na/);
+console.log("9 CSV-importcontroles geslaagd; alle testbedragen zijn synthetisch.");
