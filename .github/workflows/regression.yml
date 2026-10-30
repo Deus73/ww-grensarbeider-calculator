@@ -28,6 +28,8 @@ jobs:
         run: node payroll/compare-cases-browser.test.mjs
       - name: Controleer onafhankelijke validatie-fail-closed
         run: node payroll/verify-official-2026.test.mjs
+      - name: Controleer vergelijking van twee nettoloonscenario's
+        run: node payroll/scenario-comparison.test.mjs
       - name: Controleer bruto-netto op basis van ingeladen tabel
         run: node payroll/net-from-table.test.mjs
       - name: Controleer tabelbereik en grenswaarden
