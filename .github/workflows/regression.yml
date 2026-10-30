@@ -28,6 +28,8 @@ jobs:
         run: node payroll/compare-cases-browser.test.mjs
       - name: Controleer onafhankelijke validatie-fail-closed
         run: node payroll/verify-official-2026.test.mjs
+      - name: Controleer overdracht van profiel naar loonheffing
+        run: node tests/payroll-handoff.test.mjs
       - name: Controleer veilige loon-scenariodeellinks
         run: node payroll/share-scenario.test.mjs
       - name: Controleer batchberekening en CSV-export
