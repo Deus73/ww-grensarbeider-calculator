@@ -13,7 +13,7 @@ export function calculatePayrollBatch(table,selection,wages,otherDeductions=0){
 }
 export function parseBatchWages(text){
  if(typeof text!=="string"||text.length>10000)throw new Error("Ongeldige invoer of te veel tekens");
- const values=text.split(/[\n;,]+/).map(s=>s.trim()).filter(Boolean);
+ const values=text.split(/[\n;]+/).map(s=>s.trim()).filter(Boolean);
  if(values.length===0||values.length>500)throw new Error("Geef 1 tot maximaal 500 lonen op");
  return values.map(v=>{if(!/^(?:\d+)(?:[.,]\d{1,2})?$/.test(v))throw new Error("Ongeldig loon: "+v);return Number(v.replace(",","."));});
 }
