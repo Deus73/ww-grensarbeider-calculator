@@ -8,7 +8,7 @@
 <p class="muted">CSV-kolommen: year;period;residence;type;insurance;credit;lower;upper;withholding. Decimaalteken: punt. Alleen 2026. Geen gegevens worden verzonden of opgeslagen.</p>
 <label for="file">CSV-bestand (maximaal 20 MB)</label><input id="file" type="file" accept=".csv,text/csv">
 <div class="grid"><div><label for="source">Bron-URL (belastingdienst.nl)</label><input id="source" type="url" placeholder="https://www.belastingdienst.nl/..."></div><div><label for="document">Naam officiële tabel / document</label><input id="document" placeholder="Bijv. witte maandtabel 2026"></div><div><label for="date">Bronversie of raadpleegdatum in 2026</label><input id="date" type="date" min="2026-01-01" max="2026-12-31"></div></div>
-<button id="sample" type="button">Download leeg CSV-sjabloon</button><button id="load">Controleer en laad CSV</button><output id="loadResult" aria-live="polite"></output></section>
+<button id="sample" type="button">Download leeg CSV-sjabloon</button><button id="load">Controleer en laad CSV</button><button id="inventory" disabled>Toon overzicht van alle tabellen</button><button id="inventoryCsv" disabled>Download tabeloverzicht (CSV)</button><output id="inventoryResult" aria-live="polite"></output><output id="loadResult" aria-live="polite"></output></section>
 <section class="card"><h2>2. Zoek loonheffing op</h2>
 <div class="grid"><div><label for="wage">Tijdvakloon (€)</label><input id="wage" type="number" min="0" step=".01" value="3000"></div>
 <div><label for="period">Loontijdvak</label><select id="period"><option value="maand">Maand</option><option value="week">Week</option><option value="vierweken">Vier weken</option><option value="dag">Dag</option><option value="kwartaal">Kwartaal</option><option value="jaar">Jaar</option></select></div>
@@ -27,8 +27,9 @@ import {lookupExactOfficialSample} from "./payroll/exact-official-samples.mjs";
 import {inspectPayrollTable} from "./payroll/table-diagnostics.mjs";
 import {calculateNetFromTable} from "./payroll/net-from-table.mjs";
 import {compareNetScenarios} from "./payroll/scenario-comparison.mjs";
+import {buildPayrollInventory,inventoryToCsv} from "./payroll/table-inventory.mjs";
 const $=id=>document.getElementById(id), money=n=>new Intl.NumberFormat("nl-NL",{style:"currency",currency:"EUR"}).format(n);
-let table=null,report=null,diagnostics=null;
+let table=null,report=null,diagnostics=null,tableInventory=null;
 function download(name,content,type){const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 $("exactSample").addEventListener("click",async()=>{try{
  const input={wage:Number($("wage").value),period:$("period").value,residence:$("residence").value,type:$("type").value,insurance:$("insurance").value.trim(),credit:$("credit").value==="true",special:$("special").checked,anonymous:$("anonymous").checked};
@@ -39,7 +40,7 @@ $("exactSample").addEventListener("click",async()=>{try{
  }catch(e){$("exactResult").textContent="Opzoeking geweigerd: "+e.message;}});
 $("sample").addEventListener("click",()=>download("grenscalc-loonheffing-2026-sjabloon.csv","year;period;residence;type;insurance;credit;lower;upper;withholding\n","text/csv;charset=utf-8"));
 $("load").addEventListener("click",async()=>{
- table=null;report=null;diagnostics=null;$("exportDiagnostics").disabled=true;$("diagnose").disabled=true;$("diagnosticResult").textContent="";$("downloadReport").disabled=true;$("calculate").disabled=true;$("compareNet").disabled=true;$("netComparison").textContent="";$("compare").disabled=true;$("compareOfficial").disabled=true;$("comparison").textContent="";$("result").textContent="";
+ table=null;report=null;diagnostics=null;tableInventory=null;$("inventory").disabled=true;$("inventoryCsv").disabled=true;$("inventoryResult").textContent="";$("exportDiagnostics").disabled=true;$("diagnose").disabled=true;$("diagnosticResult").textContent="";$("downloadReport").disabled=true;$("calculate").disabled=true;$("compareNet").disabled=true;$("netComparison").textContent="";$("compare").disabled=true;$("compareOfficial").disabled=true;$("comparison").textContent="";$("result").textContent="";
  try{
  const file=$("file").files[0];if(!file)throw Error("Selecteer eerst een CSV-bestand.");
  if(file.size>20_000_000)throw Error("Bestand is groter dan 20 MB.");
@@ -48,9 +49,15 @@ $("load").addEventListener("click",async()=>{
  const groups=[...table.groups.values()],total=groups.reduce((n,g)=>n+g.length,0);
  const details=[...table.groups.entries()].slice(0,30).map(([key,rows])=>key+": "+rows.length+" rijen, "+money(rows[0].lower)+" – "+money(rows[rows.length-1].upper)).join("\\n");
  $("loadResult").textContent="CSV geladen: "+groups.length+" tabelcombinaties, "+total+" regels. Dit bevestigt niet dat de tabellen officieel of volledig zijn.\\n"+details+(groups.length>30?"\\n... meer combinaties": "");
- $("calculate").disabled=false;$("compareNet").disabled=false;$("diagnose").disabled=false;$("compare").disabled=false;$("compareOfficial").disabled=false;
+ $("calculate").disabled=false;$("compareNet").disabled=false;$("inventory").disabled=false;$("diagnose").disabled=false;$("compare").disabled=false;$("compareOfficial").disabled=false;
  }catch(e){$("loadResult").textContent="Import geweigerd: "+e.message;}
 });
+$("inventory").addEventListener("click",()=>{try{
+ tableInventory=buildPayrollInventory(table);
+ $("inventoryResult").textContent="Tabelcombinaties: "+tableInventory.groups+"; loonregels: "+tableInventory.totalRows+"\\n"+tableInventory.entries.map(e=>e.key+": "+e.rows+" rijen, "+money(e.firstWage)+" t/m "+money(e.lastWageExclusive)+" (exclusief), gaten: "+e.gaps).join("\\n")+"\\n"+tableInventory.notice;
+ $("inventoryCsv").disabled=false;
+ }catch(e){tableInventory=null;$("inventoryCsv").disabled=true;$("inventoryResult").textContent="Overzicht geweigerd: "+e.message;}});
+$("inventoryCsv").addEventListener("click",()=>{if(tableInventory)download("grenscalc-tabellenoverzicht-2026.csv",inventoryToCsv(tableInventory),"text/csv;charset=utf-8");});
 $("calculate").addEventListener("click",()=>{
  if(!table)return;
  try{
