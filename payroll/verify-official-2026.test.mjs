@@ -9,4 +9,5 @@ const report=verifyOfficialCases(table,[{input,expectedCents:30000,source}]);
 assert.equal(report.passed,0);
 assert.equal(report.results[0].status,"missing-table");
 assert.equal(report.results[0].pass,false);
-console.log("5 fail-closed validatiecontroles geslaagd; geen officiële bedragen geverifieerd.");
+assert.throws(()=>verifyOfficialCases(table,[{input,expectedCents:30000,source},{input,expectedCents:30000,source}]),/Dubbele/);
+console.log("6 fail-closed validatiecontroles geslaagd; geen officiële bedragen geverifieerd.");
