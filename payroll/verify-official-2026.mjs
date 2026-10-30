@@ -10,8 +10,12 @@ import {makeTable,lookupWithholding} from "./nl-2026-table-engine.mjs";
 
 export function verifyOfficialCases(table, cases) {
   if (!Array.isArray(cases) || cases.length===0) throw new Error("Geen onafhankelijke officiële vergelijkingscases: validatie niet uitgevoerd");
+  const seen=new Set();
   const results=cases.map((item,index)=>{
     if (!item || typeof item!=="object" || !item.source || !/^https:\/\/(www\.)?belastingdienst\.nl\//.test(item.source.url||"") || !item.source.document || !item.source.page || !item.source.date || !Number.isInteger(item.expectedCents) || item.expectedCents<0) throw new Error("Case "+(index+1)+": controleerbare officiële bron, pagina en bedrag in centen vereist");
+    const key=JSON.stringify([item.input?.period,item.input?.residence,item.input?.type,item.input?.insurance,item.input?.credit,item.input?.wage,item.input?.special===true,item.input?.anonymous===true]);
+    if(seen.has(key)) throw new Error("Dubbele officiële vergelijkingscase: "+(index+1));
+    seen.add(key);
     const actual=lookupWithholding(table,item.input);
     const actualCents=actual.status==="ok"?Math.round(actual.withholding*100):null;
     return {case:index+1,source:item.source,status:actual.status,expectedCents:item.expectedCents,actualCents,pass:actual.status==="ok"&&actualCents===item.expectedCents};
