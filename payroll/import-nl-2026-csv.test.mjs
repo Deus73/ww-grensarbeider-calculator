@@ -1,0 +1,14 @@
+import {strict as assert} from "node:assert";
+import {parsePayrollCsv} from "./import-nl-2026-csv.mjs";
+import {lookupWithholding} from "./nl-2026-table-engine.mjs";
+const source={url:"https://www.belastingdienst.nl/test",document:"SYNTHETISCHE CSV-TEST",date:"2026-10-30"};
+const header="year;period;residence;type;insurance;credit;lower;upper;withholding";
+const rows="2026;maand;NL;wit;VOLLEDIG;true;0;2000;100\n2026;maand;NL;wit;VOLLEDIG;true;2000;4000;300";
+const table=parsePayrollCsv(header+"\n"+rows,source);
+assert.equal(lookupWithholding(table,{wage:2500,period:"maand",residence:"NL",type:"wit",insurance:"VOLLEDIG",credit:true}).withholding,300);
+assert.throws(()=>parsePayrollCsv(header+"\n2026;maand;NL;wit;VOLLEDIG;true;0;2000;100,50",source),/decimale punt/);
+assert.throws(()=>parsePayrollCsv(header+"\n2026;maand;NL;wit;VOLLEDIG;ja;0;2000;100",source),/credit/);
+assert.throws(()=>parsePayrollCsv(header+"\n2026;maand;NL;wit;VOLLEDIG;true;0;2000",source),/kolommen/);
+assert.throws(()=>parsePayrollCsv(header+"\n2026;maand;NL;wit;VOLLEDIG;true;0;2000;100\n2026;maand;NL;wit;VOLLEDIG;true;1999;3000;200",source),/Overlappende/);
+assert.throws(()=>parsePayrollCsv("year;period\n2026;maand",source),/kolommen/);
+console.log("6 CSV-importcontroles geslaagd; alle testbedragen zijn synthetisch.");
