@@ -55,3 +55,10 @@ URL: https://deus73.github.io/ww-grensarbeider-calculator/?test=1
 Zes regressietests op de actuele calculatorfuncties uitgevoerd: **6/6 geslaagd**. Getest: NL 3000 bruto met en zonder heffingskortingen, blokkering woonland BE, blokkering werkland BE, blokkering leeftijd 67+, en ontbrekende handmatige inhouding. Het dashboard toont resultaten rechtstreeks in de browser. Deze regressies bewijzen **niet** dat de bruto-netto-uitkomst gelijk is aan de officiële Nederlandse loonbelastingtabellen of de Belgische sleutelformule.
 
 Officiële bronnen 2026: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/themaoverstijgend/brochures_en_publicaties/rekenvoorschriften-voor-de-geautomatiseerde-loonadministratie ; https://financien.belgium.be/nl/ondernemingen/personeel_en_loon/bedrijfsvoorheffing/berekening
+
+
+## v3.5 — onafhankelijke schijfgrens- en voorbeeldcontrole
+
+10 van 10 ingebouwde tests geslaagd. Toegevoegd: Belastingdienst-rekenvoorbeeld 2026 bij EUR 80.000 jaarinkomen zonder kortingen, grens eerste schijf EUR 38.883, grens tweede schijf EUR 78.426 en nulinkomen. Officiële voorbeeldbron: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/boxen_en_tarieven/box_1/box_1
+
+De geteste berekening blijft een vereenvoudigde jaarindicatie. Nog geen volledige loonheffingstijdvaktabellen, Belgische bedrijfsvoorheffing of herleiding voor grensarbeiders. Daarom geen officiële certificering.
