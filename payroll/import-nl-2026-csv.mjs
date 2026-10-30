@@ -8,8 +8,9 @@ export const CSV_COLUMNS=["year","period","residence","type","insurance","credit
 export function parsePayrollCsv(csv,source) {
   if (typeof csv!=="string" || !csv.trim()) throw new Error("Leeg CSV-bestand");
   const normalized=csv.replace(/^\uFEFF/,"");
-  const delimiter=normalized.slice(0,normalized.indexOf("\n")<0?normalized.length:normalized.indexOf("\n")).includes(";")?";":",";
-  const records=[];let record=[],field="",quoted=false,closed=false;
+  const firstLine=normalized.split(/\r?\n/,1)[0];
+  const delimiter=firstLine.includes(";")?";":",";
+  const records=[];let record=[],field="",quoted=false,closed=false,started=false;
   for(let i=0;i<normalized.length;i++){
     const c=normalized[i];
     if(quoted){
@@ -17,9 +18,9 @@ export function parsePayrollCsv(csv,source) {
       else if(c==='"') {quoted=false;closed=true;}
       else field+=c;
     } else if(c==='"'){
-      if(field.trim()!==""||closed) throw new Error("Ongeldige CSV-aanhalingstekens");
-      quoted=true;
-    } else if(c===delimiter){record.push(field.trim());field="";closed=false;}
+      if(started||field.trim()!==""||closed) throw new Error("Ongeldige CSV-aanhalingstekens");
+      quoted=true;started=true;
+    } else if(c===delimiter){record.push(field.trim());field="";closed=false;started=false;}
     else if(c==="\n"||c==="\r"){
       if(c==="\r"&&normalized[i+1]==="\n")i++;
       record.push(field.trim());
@@ -27,7 +28,7 @@ export function parsePayrollCsv(csv,source) {
       record=[];field="";closed=false;
     } else {
       if(closed&&!/\s/.test(c))throw new Error("Tekst na afsluitend aanhalingsteken");
-      field+=c;
+      field+=c;started=true;
     }
   }
   if(quoted)throw new Error("Niet-afgesloten CSV-aanhalingsteken");
@@ -35,6 +36,7 @@ export function parsePayrollCsv(csv,source) {
   if(record.some(v=>v!==""))records.push(record);
   const lines=records;
   const split=line=>line;
+  if(!lines.length) throw new Error("CSV-kopregel ontbreekt");
   const header=split(lines.shift());
   if (header.length!==CSV_COLUMNS.length || new Set(header).size!==header.length || CSV_COLUMNS.some(c=>!header.includes(c))) throw new Error("CSV-kolommen komen niet overeen met het vereiste schema");
   const rows=lines.map((line,i)=>{
