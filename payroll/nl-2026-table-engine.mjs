@@ -49,3 +49,19 @@ export function lookupWithholding(table, input) {
   if (!row) return {status:"missing-row",reason:"Geen passende officiële loonrij; geen extrapolatie toegestaan"};
   return {status:"ok",withholding:row.withholding,source:table.source,matchedRange:[row.lower,row.upper],year:2026};
 }
+
+/**
+ * Inspecteer geïmporteerde tabeldekking zonder fiscale bedragen te berekenen.
+ * Een aanwezige combinatie is niet automatisch een volledige officiële tabel.
+ */
+export function auditTableCoverage(table, requirements) {
+  if (!table || !(table.groups instanceof Map)) throw new Error("Geen gevalideerde tabel geladen");
+  if (!Array.isArray(requirements)) throw new Error("Vereiste combinaties moeten een lijst zijn");
+  const results=requirements.map(req=>{
+    if (!req || !PERIODS.includes(req.period) || !RESIDENCES.includes(req.residence) || !TYPES.includes(req.type) || typeof req.credit!=="boolean" || typeof req.insurance!=="string" || !req.insurance) throw new Error("Ongeldige tabelcombinatie");
+    const key=[2026,req.period,req.residence,req.type,req.insurance,req.credit].join("|");
+    const rows=table.groups.get(key);
+    return Object.freeze({key,present:!!rows,rows:rows?.length??0,firstWage:rows?.[0]?.lower??null,lastWage:rows?.[rows.length-1]?.upper??null});
+  });
+  return Object.freeze({required:results.length,present:results.filter(r=>r.present).length,missing:results.filter(r=>!r.present).length,results});
+}
