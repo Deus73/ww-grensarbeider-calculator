@@ -28,6 +28,8 @@ jobs:
         run: node payroll/compare-cases-browser.test.mjs
       - name: Controleer onafhankelijke validatie-fail-closed
         run: node payroll/verify-official-2026.test.mjs
+      - name: Controleer tabelbereik en grenswaarden
+        run: node payroll/table-diagnostics.test.mjs
       - name: Controleer exacte officiële voorbeeldopzoekingen
         run: node payroll/exact-official-samples.test.mjs
       - name: Controleer officiële NL 2026 referentiebedragen
