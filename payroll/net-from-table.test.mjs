@@ -1,0 +1,15 @@
+import {strict as assert} from "node:assert";
+import {makeTable} from "./nl-2026-table-engine.mjs";
+import {calculateNetFromTable} from "./net-from-table.mjs";
+const source={url:"https://www.belastingdienst.nl/test",document:"Synthetic fixture",date:"2026-10-30"};
+const row={year:2026,period:"maand",residence:"NL",type:"wit",insurance:"VOLLEDIG",credit:true,lower:0,upper:5000,withholding:325.55};
+const table=makeTable([row],source),input={wage:3000,period:"maand",residence:"NL",type:"wit",insurance:"VOLLEDIG",credit:true};
+const r=calculateNetFromTable(table,input,{otherDeductions:25.25});
+assert.equal(r.status,"ok");assert.equal(r.gross,3000);assert.equal(r.withholding,325.55);assert.equal(r.otherDeductions,25.25);assert.equal(r.net,2649.20);assert.equal(r.source.document,source.document);
+assert.equal(calculateNetFromTable(table,{...input,wage:6000}).net,null);
+assert.equal(calculateNetFromTable(table,{...input,special:true}).net,null);
+assert.throws(()=>calculateNetFromTable(null,input),/Geen ingeladen/);
+assert.throws(()=>calculateNetFromTable(table,{...input,wage:-1}),/Ongeldig brutoloon/);
+assert.throws(()=>calculateNetFromTable(table,input,{otherDeductions:-1}),/Ongeldige overige/);
+assert.throws(()=>calculateNetFromTable(table,input,{otherDeductions:0.001}),/Ongeldige overige/);
+console.log("12 bruto-netto tabelcontroles geslaagd; bedragen synthetisch.");
