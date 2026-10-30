@@ -18,4 +18,7 @@ assert.equal(lookupWithholding(table,{...q,insurance:"ALLEEN_BELASTING"}).status
 assert.throws(()=>makeTable([...rows,rows[0]],source),/Overlappende/);
 assert.throws(()=>makeTable([{...rows[0],withholding:-1}],source),/Ongeldig/);
 assert.throws(()=>makeTable(rows,{url:"https://example.org",document:"bad",date:"2026"}),/Belastingdienst/);
-console.log("9 lookup-adapter tests passed; synthetic fixture values are NOT official tax results.");
+assert.throws(()=>makeTable([{...rows[0],upper:1999.99},rows[1]],source),/Ontbrekend looninterval/);
+assert.throws(()=>makeTable([{...rows[0],withholding:100.001}],source),/Ongeldig/);
+assert.throws(()=>lookupWithholding(table,{...q,wage:2500.001}),/Ongeldig/);
+console.log("12 lookup-adapter tests passed; synthetic fixture values are NOT official tax results.");
