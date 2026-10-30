@@ -17,7 +17,7 @@
 <div><label for="insurance">Verzekeringscode (exact als CSV)</label><input id="insurance" value="VOLLEDIG"></div>
 <div><label for="credit">Loonheffingskorting</label><select id="credit"><option value="true">Ja</option><option value="false">Nee</option></select></div>
 <div><label><input id="special" type="checkbox" style="width:auto"> Bijzondere beloning</label></div><div><label><input id="anonymous" type="checkbox" style="width:auto"> Anoniementarief</label></div></div>
-<button id="calculate" disabled>Zoek in ingeladen tabel</button><button id="diagnose" disabled>Controleer tabelbereik en grenswaarden</button><button id="exportDiagnostics" disabled>Download tabeldiagnose (JSON)</button><output id="diagnosticResult" aria-live="polite"></output><p class="muted">Een eventueel nettobedrag is uitsluitend bruto minus de opgezochte loonheffing; overige inhoudingen zijn niet meegerekend.</p><output id="result" aria-live="polite"></output></section>
+<div><label for="otherDeductions">Overige inhoudingen per loontijdvak (€; zelf invullen)</label><input id="otherDeductions" type="number" min="0" step=".01" value="0"></div><button id="calculate" disabled>Bereken netto met ingeladen tabel</button><button id="diagnose" disabled>Controleer tabelbereik en grenswaarden</button><button id="exportDiagnostics" disabled>Download tabeldiagnose (JSON)</button><output id="diagnosticResult" aria-live="polite"></output><p class="muted">Een eventueel nettobedrag is uitsluitend bruto minus de opgezochte loonheffing; overige inhoudingen zijn niet meegerekend.</p><output id="result" aria-live="polite"></output></section>
 <section class="card"><h2>3. Vergelijk met referentiebedragen</h2><p class="muted">Download <a href="./payroll/official-nl-2026-sample-cases.json" download>9 referentiebedragen uit de officiële witte maandtabel 2026</a> (NL, jonger dan AOW-leeftijd, zonder loonheffingskorting) of upload een eigen JSON-bestand. De meegeleverde cases dienen voor bronvergelijking en zijn geen volledige loonbelastingtabel. Per case zijn input, expectedCents en source (url, document, page, date) vereist. Deze controle vergelijkt bedragen, maar kan de authenticiteit van je referentiebestand niet bewijzen.</p><label for="casesFile">Referentiecases (JSON, max. 2 MB)</label><input id="casesFile" type="file" accept=".json,application/json"><button id="compareOfficial" disabled>Vergelijk met 9 meegeleverde referentiecases</button><button id="compare" disabled>Vergelijk geüploade referentiecases</button><button id="downloadReport" disabled>Download vergelijkingsrapport (JSON)</button><output id="comparison" aria-live="polite"></output></section><p><small>Bronnen: <a href="https://download.belastingdienst.nl/belastingdienst/dl/rekenhulpen/loonheffing/2026/v01/pdf/wit_mnd_nl_std_20260101.pdf">officiële witte maandtabel 2026 (PDF)</a>, <a href="https://www.belastingdienst.nl/wps/wcm/connect/nl/personeel-en-loon/content/hulpmiddel-loonbelastingtabellen">loonbelastingtabellen</a> en <a href="https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/themaoverstijgend/brochures_en_publicaties/rekenvoorschriften-voor-de-geautomatiseerde-loonadministratie">rekenvoorschriften</a>. Geïmporteerde bedragen zijn niet automatisch geverifieerd.</small></p>
 <script type="module">
 import {parsePayrollCsv} from "./payroll/import-nl-2026-csv.mjs";
@@ -25,6 +25,7 @@ import {lookupWithholding,auditTableCoverage} from "./payroll/nl-2026-table-engi
 import {comparePayrollCases} from "./payroll/compare-cases-browser.mjs";
 import {lookupExactOfficialSample} from "./payroll/exact-official-samples.mjs";
 import {inspectPayrollTable} from "./payroll/table-diagnostics.mjs";
+import {calculateNetFromTable} from "./payroll/net-from-table.mjs";
 const $=id=>document.getElementById(id), money=n=>new Intl.NumberFormat("nl-NL",{style:"currency",currency:"EUR"}).format(n);
 let table=null,report=null,diagnostics=null;
 function download(name,content,type){const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
@@ -54,10 +55,11 @@ $("calculate").addEventListener("click",()=>{
  try{
  const input={wage:Number($("wage").value),period:$("period").value,residence:$("residence").value,type:$("type").value,insurance:$("insurance").value.trim(),credit:$("credit").value==="true",special:$("special").checked,anonymous:$("anonymous").checked};
  if($("wage").value.trim()==="")throw Error("Vul het tijdvakloon in.");
- const result=lookupWithholding(table,input);
+ const deductionText=$("otherDeductions").value.trim();if(!deductionText)throw Error("Vul overige inhoudingen in, of 0.");
+ const result=calculateNetFromTable(table,input,{otherDeductions:Number(deductionText)});
  if(result.status!=="ok"){$("result").textContent="Geen berekening: "+result.reason;return;}
- const coverage=auditTableCoverage(table,[input]).results[0];
- $("result").textContent="Indicatief netto na uitsluitend loonheffing: "+money(input.wage-result.withholding)+"\\nIngehouden loonheffing volgens geïmporteerde tabel: "+money(result.withholding)+"\nGematcht looninterval: "+money(result.matchedRange[0])+" tot "+money(result.matchedRange[1])+" (exclusief bovengrens)\nBron: "+result.source.document+" ("+result.source.date+")\n"+coverage.reason;
+ $("result").textContent="Brutoloon: "+money(result.gross)+"\\nLoonheffing volgens ingeladen tabel: "+money(result.withholding)+"\\nOverige opgegeven inhoudingen: "+money(result.otherDeductions)+"\\nIndicatief netto: "+money(result.net)+"\\nBron: "+result.source.document+" ("+result.source.date+")\\n"+result.scope;
+
  }catch(e){$("result").textContent="Berekening geweigerd: "+e.message;}
 });
 function showComparison(cases){report=comparePayrollCases(table,cases);$("downloadReport").disabled=false;const failures=report.results.filter(r=>!r.pass).slice(0,20).map(r=>"Case "+r.case+": verwacht "+r.expectedCents+" cent, gevonden "+(r.actualCents??r.status)).join("\n");$("comparison").textContent=report.passed+"/"+report.total+" referentiecases komen overeen. "+report.failed+" afwijkingen.\n"+report.notice+(failures?"\n"+failures:"");}
