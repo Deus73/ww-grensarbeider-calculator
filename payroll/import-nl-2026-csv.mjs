@@ -7,9 +7,34 @@ import {makeTable} from "./nl-2026-table-engine.mjs";
 export const CSV_COLUMNS=["year","period","residence","type","insurance","credit","lower","upper","withholding"];
 export function parsePayrollCsv(csv,source) {
   if (typeof csv!=="string" || !csv.trim()) throw new Error("Leeg CSV-bestand");
-  const lines=csv.replace(/^\uFEFF/,"").replace(/\r\n?/g,"\n").trim().split("\n");
-  const delimiter=lines[0].includes(";")?";":",";
-  const split=line=>line.split(delimiter).map(v=>v.trim());
+  const normalized=csv.replace(/^\uFEFF/,"");
+  const delimiter=normalized.slice(0,normalized.indexOf("\n")<0?normalized.length:normalized.indexOf("\n")).includes(";")?";":",";
+  const records=[];let record=[],field="",quoted=false,closed=false;
+  for(let i=0;i<normalized.length;i++){
+    const c=normalized[i];
+    if(quoted){
+      if(c==='"'&&normalized[i+1]==='"'){field+='"';i++;}
+      else if(c==='"') {quoted=false;closed=true;}
+      else field+=c;
+    } else if(c==='"'){
+      if(field.trim()!==""||closed) throw new Error("Ongeldige CSV-aanhalingstekens");
+      quoted=true;
+    } else if(c===delimiter){record.push(field.trim());field="";closed=false;}
+    else if(c==="\n"||c==="\r"){
+      if(c==="\r"&&normalized[i+1]==="\n")i++;
+      record.push(field.trim());
+      if(record.some(v=>v!==""))records.push(record);
+      record=[];field="";closed=false;
+    } else {
+      if(closed&&!/\s/.test(c))throw new Error("Tekst na afsluitend aanhalingsteken");
+      field+=c;
+    }
+  }
+  if(quoted)throw new Error("Niet-afgesloten CSV-aanhalingsteken");
+  record.push(field.trim());
+  if(record.some(v=>v!==""))records.push(record);
+  const lines=records;
+  const split=line=>line;
   const header=split(lines.shift());
   if (header.length!==CSV_COLUMNS.length || new Set(header).size!==header.length || CSV_COLUMNS.some(c=>!header.includes(c))) throw new Error("CSV-kolommen komen niet overeen met het vereiste schema");
   const rows=lines.filter(line=>line.trim()).map((line,i)=>{
