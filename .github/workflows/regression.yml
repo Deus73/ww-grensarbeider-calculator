@@ -22,5 +22,7 @@ jobs:
           node-version: '22'
       - name: Controleer Nederlandse tabeladapter
         run: node payroll/nl-2026-table-engine.test.mjs
+      - name: Controleer onafhankelijke validatie-fail-closed
+        run: node payroll/verify-official-2026.test.mjs
       - name: Controleer ingebouwde calculatorregressies
         run: node tests/calculator-regression.test.mjs
