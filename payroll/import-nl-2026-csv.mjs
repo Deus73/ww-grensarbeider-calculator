@@ -37,7 +37,7 @@ export function parsePayrollCsv(csv,source) {
   const split=line=>line;
   const header=split(lines.shift());
   if (header.length!==CSV_COLUMNS.length || new Set(header).size!==header.length || CSV_COLUMNS.some(c=>!header.includes(c))) throw new Error("CSV-kolommen komen niet overeen met het vereiste schema");
-  const rows=lines.filter(line=>line.trim()).map((line,i)=>{
+  const rows=lines.map((line,i)=>{
     const values=split(line);
     if(values.length!==header.length) throw new Error("Ongeldig aantal kolommen op regel "+(i+2));
     const raw=Object.fromEntries(header.map((h,j)=>[h,values[j]]));
