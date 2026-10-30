@@ -1,5 +1,5 @@
 import {strict as assert} from "node:assert";
-import {makeTable,lookupWithholding} from "./nl-2026-table-engine.mjs";
+import {makeTable,lookupWithholding,auditTableCoverage} from "./nl-2026-table-engine.mjs";
 const source={url:"https://www.belastingdienst.nl/wps/wcm/connect/nl/personeel-en-loon/content/hulpmiddel-loonbelastingtabellen",document:"Testfixture, NIET officiële tabelwaarden",date:"2026-10-30"};
 // These are synthetic fixtures testing lookup mechanics only, not tax correctness.
 const rows=[
@@ -21,4 +21,12 @@ assert.throws(()=>makeTable(rows,{url:"https://example.org",document:"bad",date:
 assert.throws(()=>makeTable([{...rows[0],upper:1999.99},rows[1]],source),/Ontbrekend looninterval/);
 assert.throws(()=>makeTable([{...rows[0],withholding:100.001}],source),/Ongeldig/);
 assert.throws(()=>lookupWithholding(table,{...q,wage:2500.001}),/Ongeldig/);
-console.log("12 lookup-adapter tests passed; synthetic fixture values are NOT official tax results.");
+const audit=auditTableCoverage(table,[
+ {period:"maand",residence:"NL",type:"wit",insurance:"VOLLEDIG",credit:true},
+ {period:"week",residence:"BE",type:"wit",insurance:"VOLLEDIG",credit:true}
+]);
+assert.equal(audit.present,1);
+assert.equal(audit.missing,1);
+assert.equal(audit.results[0].rows,2);
+assert.equal(audit.results[1].lastWage,null);
+console.log("16 adapter- en dekkingscontroles geslaagd; synthetische waarden zijn NIET officieel.");
