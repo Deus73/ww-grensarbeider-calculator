@@ -7,6 +7,16 @@ export const PERIODS = Object.freeze(["dag","week","vierweken","maand","kwartaal
 export const RESIDENCES = Object.freeze(["NL","BE","EU_EER_CH_BES","DERDE_LAND","ARUBA_SURINAME"]);
 export const TYPES = Object.freeze(["wit","groen"]);
 const finite = n => typeof n === "number" && Number.isFinite(n);
+/** Alleen echte HTTPS-hostnamen van de Belastingdienst; een URL bewijst geen tabelauthenticiteit. */
+export function isBelastingdienstSourceUrl(value) {
+ if(typeof value!=="string")return false;
+ try {
+  const url=new URL(value);
+  return url.protocol==="https:"&&!url.username&&!url.password&&!url.port&&
+   (url.hostname==="belastingdienst.nl"||url.hostname==="www.belastingdienst.nl"||url.hostname==="download.belastingdienst.nl")&&
+   url.pathname!=="/";
+ } catch {return false;}
+}
 const cents = n => Math.round((n + Number.EPSILON) * 100);
 const exactCents = n => finite(n) && Math.abs(n * 100 - Math.round(n * 100)) < 1e-7;
 export function validateRow(row) {
@@ -20,7 +30,7 @@ export function validateRow(row) {
   return Object.freeze({...row});
 }
 export function makeTable(rows, source) {
-  if (!source || !/^https:\/\/(www\.)?belastingdienst\.nl\//.test(source.url || "") || !source.document || !/^2026-(0[1-9]|1[0-2])-([0-2][0-9]|3[01])$/.test(source.date||"") || Number.isNaN(Date.parse(source.date))) throw new Error("Controleerbare Belastingdienst-bron en geldige datum vereist");
+  if (!source || !isBelastingdienstSourceUrl(source.url) || !source.document || !/^2026-(0[1-9]|1[0-2])-([0-2][0-9]|3[01])$/.test(source.date||"") || Number.isNaN(Date.parse(source.date))) throw new Error("Controleerbare Belastingdienst-bron en geldige datum vereist");
   if (!Array.isArray(rows) || rows.length === 0) throw new Error("Geen tabelgegevens aangeleverd");
   const clean = rows.map(validateRow);
   const key = r => [r.year,r.period,r.residence,r.type,r.insurance,r.credit].join("|");
@@ -33,7 +43,7 @@ export function makeTable(rows, source) {
       if (cents(group[i].lower) > cents(group[i-1].upper)) throw new Error("Ontbrekend looninterval in tabel");
     }
   }
-  return Object.freeze({source:Object.freeze({...source}),groups});
+  return Object.freeze({source:Object.freeze({...source}),groups,verifiedOfficial:false});
 }
 export function lookupWithholding(table, input) {
   if (!table || !table.groups) throw new Error("Geen gevalideerde tabel geladen");
