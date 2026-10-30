@@ -1,23 +1,35 @@
-# Nederlandse loonheffing 2026 — implementatiestatus
+# Nederlandse loonheffing 2026 — status en grenzen
 
-## Toegevoegd
-- `nl-2026-table-engine.mjs`: strikte tabelgestuurde loonheffing-lookup, met onderscheid tussen woonland NL/BE/overig, wit/groen, tijdvak, verzekeringssituatie en loonheffingskorting.
-- `nl-2026-table-engine.test.mjs`: negen technische tests met synthetische waarden, niet met officiële belastingbedragen.
-- Invoercontrole op tabelidentificatie, ontbrekende intervallen, overlap en bronherkomst.
-- Geen extrapolatie naar ontbrekende tabellen of bijzondere beloningen.
+De module is een **tabelgestuurde hulpmodule**, geen gecertificeerde loonadministratie of volledige grensarbeiderberekening. Een bron-URL of door de gebruiker aangeleverde CSV bewijst **niet** dat de bedragen officieel, volledig of actueel zijn. Elke geïmporteerde tabel heeft daarom `verifiedOfficial: false`.
 
-## Niet voltooid
-- De officiële Belastingdienst-2026-tabeldata en de parameterbijlage zijn nog niet geïmporteerd.
-- De tabeladapter is nog niet aan de bruto-nettointerface gekoppeld.
-- De 2026-rekenvoorschriften voor herleidingsfactoren, AOW-overgang, bijzondere beloningen en afronding zijn nog niet volledig geprogrammeerd.
-- Er is nog geen onafhankelijke vergelijking met officiële 2026-tabelbedragen.
-- De nieuwe module is een technische bouwsteen en mag niet als een volledige loonheffingsmotor worden gepresenteerd.
+## Beschikbare functies
 
-## Primaire bronnen
-- https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/themaoverstijgend/brochures_en_publicaties/rekenvoorschriften-voor-de-geautomatiseerde-loonadministratie
-- https://www.belastingdienst.nl/wps/wcm/connect/nl/personeel-en-loon/content/hulpmiddel-loonbelastingtabellen
+- CSV-import met tabelidentificatie (2026, tijdvak, woonland, wit/groen, verzekering en loonheffingskorting).
+- Intervalcontrole: geen overlappende of ontbrekende loonintervallen binnen één geïmporteerde combinatie; geen extrapolatie buiten het bereik.
+- Bruto-netto indicatie op basis van **ingeladen** inhouding en zelf opgegeven overige inhoudingen.
+- Vergelijking van twee scenario's, batchberekening (maximaal 500 lonen) en CSV-export.
+- Tabelinventaris en diagnose van grenzen en ontbrekende combinaties.
+- Vergelijking met afzonderlijke referentiecases; deze vergelijking **authenticeert de bron niet**.
+- Exacte voorbeeldopzoeking op basis van negen meegeleverde cases; die voorbeelden zijn geen complete tabel.
+- Deelbare invoerlink; deze bevat geen ingeladen tabelgegevens.
 
-## Tests uitvoeren
-`node payroll/nl-2026-table-engine.test.mjs`
+## Nog niet voltooid
 
-De negen technische tests zijn afzonderlijk uitgevoerd op de huidige module en geslaagd. De testfixturebedragen zijn verzonnen om uitsluitend de lookup-logica te toetsen.
+1. Officiële 2026-tabellen volledig en onafhankelijk controleren en verwerken, inclusief herleidingssituaties.
+2. Toepasselijke rekenvoorschriften (o.a. AOW, bijzondere beloningen en afronding) implementeren en met onafhankelijke fiscale testcases toetsen.
+3. Belgische bedrijfsvoorheffing, sociale zekerheid en grensarbeiderssituaties volledig uitwerken.
+4. Integratietests en gebruikersacceptatietests met echte loonstroken en officiële brongevallen uitvoeren.
+
+**Let op:** Een correcte softwaretest met synthetische bedragen is geen bewijs van fiscale juistheid.
+
+## Bronnen
+
+- [Loonbelastingtabellen 2026–2021](https://www.belastingdienst.nl/wps/wcm/connect/nl/personeel-en-loon/content/hulpmiddel-loonbelastingtabellen)
+- [Handboek Loonheffingen](https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/themaoverstijgend/brochures_en_publicaties/handboek-loonheffingen)
+- [Rekenvoorschriften](https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/themaoverstijgend/brochures_en_publicaties/rekenvoorschriften-voor-de-geautomatiseerde-loonadministratie)
+
+De Belastingdienst publiceerde op 27 oktober 2026 een tweede uitgave van het Handboek Loonheffingen 2026. Wijzigingen daaruit moeten nog op impact worden beoordeeld.
+
+## Tests
+
+Start de GitHub Actions-workflow `.github/workflows/regression.yml`, of voer de `*.test.mjs`-bestanden uit met Node.js 22. Een geslaagde CI-run moet afzonderlijk worden gecontroleerd; opname in de workflow is geen bewijs dat deze is geslaagd.
