@@ -18,7 +18,7 @@
 <div><label for="credit">Loonheffingskorting</label><select id="credit"><option value="true">Ja</option><option value="false">Nee</option></select></div>
 <div><label><input id="special" type="checkbox" style="width:auto"> Bijzondere beloning</label></div><div><label><input id="anonymous" type="checkbox" style="width:auto"> Anoniementarief</label></div></div>
 <button id="calculate" disabled>Zoek in ingeladen tabel</button><p class="muted">Een eventueel nettobedrag is uitsluitend bruto minus de opgezochte loonheffing; overige inhoudingen zijn niet meegerekend.</p><output id="result" aria-live="polite"></output></section>
-<section class="card"><h2>3. Vergelijk met referentiebedragen</h2><p class="muted">Download <a href="./payroll/official-nl-2026-sample-cases.json" download>9 referentiebedragen uit de officiële witte maandtabel 2026</a> (NL, jonger dan AOW-leeftijd, zonder loonheffingskorting) of upload een eigen JSON-bestand. De meegeleverde cases dienen voor bronvergelijking en zijn geen volledige loonbelastingtabel. Per case zijn input, expectedCents en source (url, document, page, date) vereist. Deze controle vergelijkt bedragen, maar kan de authenticiteit van je referentiebestand niet bewijzen.</p><label for="casesFile">Referentiecases (JSON, max. 2 MB)</label><input id="casesFile" type="file" accept=".json,application/json"><button id="compare" disabled>Vergelijk referentiecases</button><button id="downloadReport" disabled>Download vergelijkingsrapport (JSON)</button><output id="comparison" aria-live="polite"></output></section><p><small>Bronnen: <a href="https://download.belastingdienst.nl/belastingdienst/dl/rekenhulpen/loonheffing/2026/v01/pdf/wit_mnd_nl_std_20260101.pdf">officiële witte maandtabel 2026 (PDF)</a>, <a href="https://www.belastingdienst.nl/wps/wcm/connect/nl/personeel-en-loon/content/hulpmiddel-loonbelastingtabellen">loonbelastingtabellen</a> en <a href="https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/themaoverstijgend/brochures_en_publicaties/rekenvoorschriften-voor-de-geautomatiseerde-loonadministratie">rekenvoorschriften</a>. Geïmporteerde bedragen zijn niet automatisch geverifieerd.</small></p>
+<section class="card"><h2>3. Vergelijk met referentiebedragen</h2><p class="muted">Download <a href="./payroll/official-nl-2026-sample-cases.json" download>9 referentiebedragen uit de officiële witte maandtabel 2026</a> (NL, jonger dan AOW-leeftijd, zonder loonheffingskorting) of upload een eigen JSON-bestand. De meegeleverde cases dienen voor bronvergelijking en zijn geen volledige loonbelastingtabel. Per case zijn input, expectedCents en source (url, document, page, date) vereist. Deze controle vergelijkt bedragen, maar kan de authenticiteit van je referentiebestand niet bewijzen.</p><label for="casesFile">Referentiecases (JSON, max. 2 MB)</label><input id="casesFile" type="file" accept=".json,application/json"><button id="compareOfficial" disabled>Vergelijk met 9 meegeleverde referentiecases</button><button id="compare" disabled>Vergelijk geüploade referentiecases</button><button id="downloadReport" disabled>Download vergelijkingsrapport (JSON)</button><output id="comparison" aria-live="polite"></output></section><p><small>Bronnen: <a href="https://download.belastingdienst.nl/belastingdienst/dl/rekenhulpen/loonheffing/2026/v01/pdf/wit_mnd_nl_std_20260101.pdf">officiële witte maandtabel 2026 (PDF)</a>, <a href="https://www.belastingdienst.nl/wps/wcm/connect/nl/personeel-en-loon/content/hulpmiddel-loonbelastingtabellen">loonbelastingtabellen</a> en <a href="https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/themaoverstijgend/brochures_en_publicaties/rekenvoorschriften-voor-de-geautomatiseerde-loonadministratie">rekenvoorschriften</a>. Geïmporteerde bedragen zijn niet automatisch geverifieerd.</small></p>
 <script type="module">
 import {parsePayrollCsv} from "./payroll/import-nl-2026-csv.mjs";
 import {lookupWithholding,auditTableCoverage} from "./payroll/nl-2026-table-engine.mjs";
@@ -26,9 +26,9 @@ import {comparePayrollCases} from "./payroll/compare-cases-browser.mjs";
 const $=id=>document.getElementById(id), money=n=>new Intl.NumberFormat("nl-NL",{style:"currency",currency:"EUR"}).format(n);
 let table=null,report=null;
 function download(name,content,type){const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
-$("sample").addEventListener("click",()=>download("grenscalc-loonheffing-2026-sjabloon.csv","year;period;residence;type;insurance;credit;lower;upper;withholding\\n","text/csv;charset=utf-8"));
+$("sample").addEventListener("click",()=>download("grenscalc-loonheffing-2026-sjabloon.csv","year;period;residence;type;insurance;credit;lower;upper;withholding\n","text/csv;charset=utf-8"));
 $("load").addEventListener("click",async()=>{
- table=null;report=null;$("downloadReport").disabled=true;$("calculate").disabled=true;$("compare").disabled=true;$("comparison").textContent="";$("result").textContent="";
+ table=null;report=null;$("downloadReport").disabled=true;$("calculate").disabled=true;$("compare").disabled=true;$("compareOfficial").disabled=true;$("comparison").textContent="";$("result").textContent="";
  try{
  const file=$("file").files[0];if(!file)throw Error("Selecteer eerst een CSV-bestand.");
  if(file.size>20_000_000)throw Error("Bestand is groter dan 20 MB.");
@@ -37,7 +37,7 @@ $("load").addEventListener("click",async()=>{
  const groups=[...table.groups.values()],total=groups.reduce((n,g)=>n+g.length,0);
  const details=[...table.groups.entries()].slice(0,30).map(([key,rows])=>key+": "+rows.length+" rijen, "+money(rows[0].lower)+" – "+money(rows[rows.length-1].upper)).join("\\n");
  $("loadResult").textContent="CSV geladen: "+groups.length+" tabelcombinaties, "+total+" regels. Dit bevestigt niet dat de tabellen officieel of volledig zijn.\\n"+details+(groups.length>30?"\\n... meer combinaties": "");
- $("calculate").disabled=false;$("compare").disabled=false;
+ $("calculate").disabled=false;$("compare").disabled=false;$("compareOfficial").disabled=false;
  }catch(e){$("loadResult").textContent="Import geweigerd: "+e.message;}
 });
 $("calculate").addEventListener("click",()=>{
@@ -51,14 +51,14 @@ $("calculate").addEventListener("click",()=>{
  $("result").textContent="Indicatief netto na uitsluitend loonheffing: "+money(input.wage-result.withholding)+"\\nIngehouden loonheffing volgens geïmporteerde tabel: "+money(result.withholding)+"\nGematcht looninterval: "+money(result.matchedRange[0])+" tot "+money(result.matchedRange[1])+" (exclusief bovengrens)\nBron: "+result.source.document+" ("+result.source.date+")\n"+coverage.reason;
  }catch(e){$("result").textContent="Berekening geweigerd: "+e.message;}
 });
+function showComparison(cases){report=comparePayrollCases(table,cases);$("downloadReport").disabled=false;const failures=report.results.filter(r=>!r.pass).slice(0,20).map(r=>"Case "+r.case+": verwacht "+r.expectedCents+" cent, gevonden "+(r.actualCents??r.status)).join("\n");$("comparison").textContent=report.passed+"/"+report.total+" referentiecases komen overeen. "+report.failed+" afwijkingen.\n"+report.notice+(failures?"\n"+failures:"");}
+$("compareOfficial").addEventListener("click",async()=>{try{const response=await fetch("./payroll/official-nl-2026-sample-cases.json",{cache:"no-store"});if(!response.ok)throw Error("Referentiebestand niet bereikbaar: HTTP "+response.status);showComparison(await response.json());}catch(e){$("comparison").textContent="Vergelijking geweigerd: "+e.message;}});
 $("compare").addEventListener("click",async()=>{
  try{
  const file=$("casesFile").files[0];if(!file)throw Error("Selecteer een JSON-bestand.");
  if(file.size>2_000_000)throw Error("JSON groter dan 2 MB.");
  const cases=JSON.parse(await file.text());
- report=comparePayrollCases(table,cases);$("downloadReport").disabled=false;
- const failures=report.results.filter(r=>!r.pass).slice(0,20).map(r=>"Case "+r.case+": verwacht "+r.expectedCents+" cent, gevonden "+(r.actualCents??r.status)).join("\n");
- $("comparison").textContent=report.passed+"/"+report.total+" referentiecases komen overeen. "+report.failed+" afwijkingen.\n"+report.notice+(failures?"\n"+failures:"");
+ showComparison(cases);
  }catch(e){$("comparison").textContent="Vergelijking geweigerd: "+e.message;}
 });
 $("downloadReport").addEventListener("click",()=>{if(report)download("grenscalc-referentiecontrole-2026.json",JSON.stringify(report,null,2),"application/json");});
