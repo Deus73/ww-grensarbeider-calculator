@@ -1,0 +1,26 @@
+name: GrensCalc regressietests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Controleer Nederlandse tabeladapter
+        run: node payroll/nl-2026-table-engine.test.mjs
+      - name: Controleer ingebouwde calculatorregressies
+        run: node tests/calculator-regression.test.mjs
