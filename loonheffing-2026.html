@@ -4,7 +4,7 @@
 <p><a href="./index.html">← Terug naar GrensCalc</a></p>
 <h1>Nederlandse loonbelastingtabellen 2026</h1>
 <p class="warning">Deze functie gebruikt uitsluitend zelf ingeladen, vooraf gecontroleerde tabelregels. Er worden <strong>geen officiële tabellen meegeleverd</strong>. Controleer bron en volledigheid. Geen fiscale validatie of automatische herleiding.</p>
-<section class="card"><h2>1. Laad tabelgegevens</h2>
+<section class="card"><h2>0. Officiële voorbeeldbedragen (zonder CSV)</h2><p class="muted">Zoek rechtstreeks in negen bronrijen uit de witte maandtabel 2026. Alleen exacte bedragen, NL-woonland, jonger dan AOW en zonder loonheffingskorting; geen interpolatie en geen volledige tabeldekking.</p><button id="exactSample">Zoek exact officieel voorbeeld met bovenstaande invoer</button><output id="exactResult" aria-live="polite"></output></section><section class="card"><h2>1. Laad tabelgegevens</h2>
 <p class="muted">CSV-kolommen: year;period;residence;type;insurance;credit;lower;upper;withholding. Decimaalteken: punt. Alleen 2026. Geen gegevens worden verzonden of opgeslagen.</p>
 <label for="file">CSV-bestand (maximaal 20 MB)</label><input id="file" type="file" accept=".csv,text/csv">
 <div class="grid"><div><label for="source">Bron-URL (belastingdienst.nl)</label><input id="source" type="url" placeholder="https://www.belastingdienst.nl/..."></div><div><label for="document">Naam officiële tabel / document</label><input id="document" placeholder="Bijv. witte maandtabel 2026"></div><div><label for="date">Bronversie of raadpleegdatum in 2026</label><input id="date" type="date" min="2026-01-01" max="2026-12-31"></div></div>
@@ -23,9 +23,17 @@
 import {parsePayrollCsv} from "./payroll/import-nl-2026-csv.mjs";
 import {lookupWithholding,auditTableCoverage} from "./payroll/nl-2026-table-engine.mjs";
 import {comparePayrollCases} from "./payroll/compare-cases-browser.mjs";
+import {lookupExactOfficialSample} from "./payroll/exact-official-samples.mjs";
 const $=id=>document.getElementById(id), money=n=>new Intl.NumberFormat("nl-NL",{style:"currency",currency:"EUR"}).format(n);
 let table=null,report=null;
 function download(name,content,type){const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+$("exactSample").addEventListener("click",async()=>{try{
+ const input={wage:Number($("wage").value),period:$("period").value,residence:$("residence").value,type:$("type").value,insurance:$("insurance").value.trim(),credit:$("credit").value==="true",special:$("special").checked,anonymous:$("anonymous").checked};
+ if($("wage").value.trim()==="")throw Error("Vul een tijdvakloon in.");
+ const response=await fetch("./payroll/official-nl-2026-sample-cases.json");if(!response.ok)throw Error("Bronvoorbeelden niet bereikbaar");
+ const result=lookupExactOfficialSample(await response.json(),input);
+ $("exactResult").textContent=result.status==="ok"?"Exact bronvoorbeeld: "+money(result.withholding)+" loonheffing bij "+money(result.exactWage)+". Alleen deze gepubliceerde rij; geen volledige nettoberekening. Bron: "+result.source.url:"Geen resultaat: "+result.reason;
+ }catch(e){$("exactResult").textContent="Opzoeking geweigerd: "+e.message;}});
 $("sample").addEventListener("click",()=>download("grenscalc-loonheffing-2026-sjabloon.csv","year;period;residence;type;insurance;credit;lower;upper;withholding\n","text/csv;charset=utf-8"));
 $("load").addEventListener("click",async()=>{
  table=null;report=null;$("downloadReport").disabled=true;$("calculate").disabled=true;$("compare").disabled=true;$("compareOfficial").disabled=true;$("comparison").textContent="";$("result").textContent="";
