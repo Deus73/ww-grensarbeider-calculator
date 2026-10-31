@@ -35,4 +35,11 @@ assert.equal(isBelastingdienstSourceUrl("https://www.belastingdienst.nl/tabellen
 for(const bad of ["http://www.belastingdienst.nl/tabel","https://belastingdienst.nl.evil.test/tabel","https://www.belastingdienst.nl@evil.test/tabel","https://evil.test/belastingdienst.nl/tabel","https://www.belastingdienst.nl:444/tabel","javascript:alert(1)"])assert.equal(isBelastingdienstSourceUrl(bad),false,bad);
 assert.throws(()=>makeTable(rows,{...source,url:"https://www.belastingdienst.nl.evil.test/tabel"}),/Belastingdienst/);
 assert.equal(makeTable(rows,{...source,url:"https://download.belastingdienst.nl/belastingdienst/docs/tabel.pdf"}).verifiedOfficial,false);
-console.log("27 adapter- en dekkingscontroles geslaagd; synthetische waarden zijn NIET officieel.");
+assert.throws(()=>makeTable([{...rows[0],insurance:"VOLLEDIG|false"}],source),/Verzekering/);
+assert.throws(()=>makeTable([{...rows[0],insurance:""}],source),/Verzekering/);
+assert.throws(()=>makeTable(rows,{...source,date:"2026-02-30"}),/datum/);
+assert.throws(()=>makeTable(rows,{...source,date:"2026-02-29"}),/datum/);
+assert.throws(()=>makeTable(rows,{...source,date:"2026-04-31"}),/datum/);
+assert.throws(()=>makeTable([{...rows[0],upper:100000000000000}],source),/Ongeldig/);
+assert.equal(lookupWithholding(table,{...q,insurance:"VOLLEDIG|false"}).status,"unsupported");
+console.log("34 adapter- en dekkingscontroles geslaagd; synthetische waarden zijn NIET officieel.");
