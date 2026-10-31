@@ -20,6 +20,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Controleer Nederlandse rekenvoorschriften 2026 basisformule
+        run: node payroll/nl-2026-rekenvoorschriften-basic.test.mjs
       - name: Controleer Nederlandse tabeladapter
         run: node payroll/nl-2026-table-engine.test.mjs
       - name: Controleer herimport met bestaand importbewijs
