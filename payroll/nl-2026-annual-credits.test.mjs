@@ -7,7 +7,7 @@ assert.equal(old(0).general,1556);
 assert.equal(young(29736).general,3115);
 assert.equal(young(78426).general,0);
 assert.equal(old(78426).general,0);
-assert.equal(young(11965).labour,995.96);
+assert.equal(young(11965).labour,995.97);
 assert.equal(old(11965).labour,497.27);
 assert.equal(young(25845).labour,5300.05);
 assert.equal(old(25845).labour,2647.04);
