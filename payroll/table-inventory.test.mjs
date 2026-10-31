@@ -18,4 +18,5 @@ assert.equal(csv.trim().split("\n").length,3);
 assert.ok(csv.includes('"BE"'));
 assert.throws(()=>buildPayrollInventory(null),/Geen gevalideerde/);
 assert.throws(()=>buildPayrollInventory(table,[{period:"wrong"}]),/Ongeldige/);
-console.log("12 tabeloverzichtcontroles geslaagd met synthetische gegevens.");
+assert.throws(()=>buildPayrollInventory(table,[{period:"maand",residence:"NL",type:"wit",insurance:"VOLLEDIG|false",credit:false}]),/Ongeldige/);
+console.log("13 tabeloverzichtcontroles geslaagd met synthetische gegevens.");
