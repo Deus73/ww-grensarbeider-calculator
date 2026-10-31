@@ -12,4 +12,5 @@ assert.equal(lookupExactOfficialSample(cases,{...input,special:true}).status,"un
 assert.equal(lookupExactOfficialSample(cases,{...input,anonymous:true}).status,"unsupported");
 assert.throws(()=>lookupExactOfficialSample(cases,{...input,wage:670.501}),/Ongeldig/);
 assert.equal(lookupExactOfficialSample([...cases,cases[0]],input).status,"missing-exact-example");
-console.log("17 exacte-bronrijcontroles geslaagd (9 bronbedragen en 8 fail-closed situaties).");
+assert.equal(lookupExactOfficialSample([{...cases[0],source:{...cases[0].source,url:"https://www.belastingdienst.nl.evil.example/example"}}],input).status,"invalid-reference");
+console.log("18 exacte-bronrijcontroles geslaagd (9 bronbedragen en 8 fail-closed situaties).");
