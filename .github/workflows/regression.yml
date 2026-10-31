@@ -20,6 +20,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Controleer loonadministratie-router 2026
+        run: node payroll/nl-2026-payroll-router.test.mjs
       - name: Controleer herleidingsmatrix 2026
         run: node payroll/nl-2026-herleiding.test.mjs
       - name: Controleer jaarlijkse heffingskortingen 2026
