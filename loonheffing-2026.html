@@ -8,7 +8,7 @@
 <p class="muted">CSV-kolommen: year;period;residence;type;insurance;credit;lower;upper;withholding. Decimaalteken: punt. Alleen 2026. Geen gegevens worden verzonden of opgeslagen.</p>
 <label for="file">CSV-bestand (maximaal 20 MB)</label><input id="file" type="file" accept=".csv,text/csv">
 <div class="grid"><div><label for="source">Bron-URL (belastingdienst.nl)</label><input id="source" type="url" placeholder="https://www.belastingdienst.nl/..."></div><div><label for="document">Naam officiële tabel / document</label><input id="document" placeholder="Bijv. witte maandtabel 2026"></div><div><label for="date">Bronversie of raadpleegdatum in 2026</label><input id="date" type="date" min="2026-01-01" max="2026-12-31"></div></div>
-<button id="sample" type="button">Download leeg CSV-sjabloon</button><button id="load">Controleer en laad CSV</button><button id="inventory" disabled>Toon overzicht van alle tabellen</button><button id="inventoryCsv" disabled>Download tabeloverzicht (CSV)</button><output id="inventoryResult" aria-live="polite"></output><output id="loadResult" aria-live="polite"></output></section>
+<button id="sample" type="button">Download leeg CSV-sjabloon</button><button id="load">Controleer en laad CSV</button><button id="inventory" disabled>Toon overzicht van alle tabellen</button><button id="inventoryCsv" disabled>Download tabeloverzicht (CSV)</button><output id="inventoryResult" aria-live="polite"></output><button id="downloadManifest" disabled>Download importbewijs (JSON + SHA-256)</button><output id="manifestResult" aria-live="polite"></output><output id="loadResult" aria-live="polite"></output></section>
 <section class="card"><h2>2. Zoek loonheffing op</h2>
 <div class="grid"><div><label for="wage">Tijdvakloon (€)</label><input id="wage" type="number" min="0" step=".01" value="3000"></div>
 <div><label for="period">Loontijdvak</label><select id="period"><option value="maand">Maand</option><option value="week">Week</option><option value="vierweken">Vier weken</option><option value="dag">Dag</option><option value="kwartaal">Kwartaal</option><option value="jaar">Jaar</option></select></div>
@@ -30,8 +30,9 @@ import {compareNetScenarios} from "./payroll/scenario-comparison.mjs";
 import {buildPayrollInventory,inventoryToCsv} from "./payroll/table-inventory.mjs";
 import {calculatePayrollBatch,parseBatchWages,batchResultsCsv} from "./payroll/batch-calculator.mjs";
 import {encodePayrollScenario,decodePayrollScenario} from "./payroll/share-scenario.mjs";
+import {bytesToHex,createImportManifest} from "./payroll/import-manifest.mjs";
 const $=id=>document.getElementById(id), money=n=>new Intl.NumberFormat("nl-NL",{style:"currency",currency:"EUR"}).format(n);
-let table=null,report=null,diagnostics=null,tableInventory=null,batchReport=null;
+let table=null,report=null,diagnostics=null,tableInventory=null,batchReport=null,importManifest=null;
 function download(name,content,type){const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 function scenarioInput(){if(!$("wage").value.trim())throw Error("Vul een loonbedrag in.");return {wage:Number($("wage").value),period:$("period").value,residence:$("residence").value,type:$("type").value,insurance:$("insurance").value.trim(),credit:$("credit").value==="true"};}
 if(location.search){try{const s=decodePayrollScenario(location.search);$("wage").value=s.wage;$("period").value=s.period;$("residence").value=s.residence;$("type").value=s.type;$("insurance").value=s.insurance;$("credit").value=String(s.credit);$("shareResult").textContent="Scenario uit deellink ingevuld. Controleer vooral verzekeringscode, tabelsoort en loonheffingskorting: een verwijzende pagina kan hiervoor standaardwaarden hebben gebruikt. Laad nog een tabel voor berekeningen.";}catch(e){$("shareResult").textContent="Deellink niet toegepast: "+e.message;}}
@@ -45,18 +46,24 @@ $("exactSample").addEventListener("click",async()=>{try{
  }catch(e){$("exactResult").textContent="Opzoeking geweigerd: "+e.message;}});
 $("sample").addEventListener("click",()=>download("grenscalc-loonheffing-2026-sjabloon.csv","year;period;residence;type;insurance;credit;lower;upper;withholding\n","text/csv;charset=utf-8"));
 $("load").addEventListener("click",async()=>{
- table=null;report=null;diagnostics=null;tableInventory=null;batchReport=null;$("runBatch").disabled=true;$("downloadBatch").disabled=true;$("batchResult").textContent="";$("inventory").disabled=true;$("inventoryCsv").disabled=true;$("inventoryResult").textContent="";$("exportDiagnostics").disabled=true;$("diagnose").disabled=true;$("diagnosticResult").textContent="";$("downloadReport").disabled=true;$("calculate").disabled=true;$("compareNet").disabled=true;$("netComparison").textContent="";$("compare").disabled=true;$("compareOfficial").disabled=true;$("comparison").textContent="";$("result").textContent="";
+ table=null;report=null;diagnostics=null;tableInventory=null;batchReport=null;importManifest=null;$("downloadManifest").disabled=true;$("manifestResult").textContent="";$("runBatch").disabled=true;$("downloadBatch").disabled=true;$("batchResult").textContent="";$("inventory").disabled=true;$("inventoryCsv").disabled=true;$("inventoryResult").textContent="";$("exportDiagnostics").disabled=true;$("diagnose").disabled=true;$("diagnosticResult").textContent="";$("downloadReport").disabled=true;$("calculate").disabled=true;$("compareNet").disabled=true;$("netComparison").textContent="";$("compare").disabled=true;$("compareOfficial").disabled=true;$("comparison").textContent="";$("result").textContent="";
  try{
  const file=$("file").files[0];if(!file)throw Error("Selecteer eerst een CSV-bestand.");
  if(file.size>20_000_000)throw Error("Bestand is groter dan 20 MB.");
  const source={url:$("source").value.trim(),document:$("document").value.trim(),date:$("date").value};
- table=parsePayrollCsv(await file.text(),source);
+ const csv=await file.text();
+ table=parsePayrollCsv(csv,source);
  const groups=[...table.groups.values()],total=groups.reduce((n,g)=>n+g.length,0);
- const details=[...table.groups.entries()].slice(0,30).map(([key,rows])=>key+": "+rows.length+" rijen, "+money(rows[0].lower)+" – "+money(rows[rows.length-1].upper)).join("\\n");
- $("loadResult").textContent="CSV geladen: "+groups.length+" tabelcombinaties, "+total+" regels. Dit bevestigt niet dat de tabellen officieel of volledig zijn.\\n"+details+(groups.length>30?"\\n... meer combinaties": "");
+ const digest=await crypto.subtle.digest("SHA-256",await file.arrayBuffer());
+ importManifest=createImportManifest({filename:file.name,size:file.size,sha256:bytesToHex(new Uint8Array(digest)),source,groups:groups.length,rows:total});
+ $("manifestResult").textContent="SHA-256 van het originele CSV-bestand: "+importManifest.sha256+". Dit is geen fiscale bronvalidatie.";
+ $("downloadManifest").disabled=false;
+ const details=[...table.groups.entries()].slice(0,30).map(([key,rows])=>key+": "+rows.length+" rijen, "+money(rows[0].lower)+" – "+money(rows[rows.length-1].upper)).join("\n");
+ $("loadResult").textContent="CSV geladen: "+groups.length+" tabelcombinaties, "+total+" regels. Dit bevestigt niet dat de tabellen officieel of volledig zijn.\n"+details+(groups.length>30?"\n... meer combinaties": "");
  $("calculate").disabled=false;$("compareNet").disabled=false;$("runBatch").disabled=false;$("inventory").disabled=false;$("diagnose").disabled=false;$("compare").disabled=false;$("compareOfficial").disabled=false;
  }catch(e){$("loadResult").textContent="Import geweigerd: "+e.message;}
 });
+$("downloadManifest").addEventListener("click",()=>{if(importManifest)download("grenscalc-importbewijs-2026.json",JSON.stringify(importManifest,null,2),"application/json");});
 $("runBatch").addEventListener("click",()=>{try{
  const selection={period:$("period").value,residence:$("residence").value,type:$("type").value,insurance:$("insurance").value.trim(),credit:$("credit").value==="true",special:$("special").checked,anonymous:$("anonymous").checked};
  if(!$("otherDeductions").value.trim())throw Error("Vul overige inhoudingen in.");
