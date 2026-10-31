@@ -13,7 +13,7 @@ export function buildPayrollInventory(table,requirements=[]){
  }
  const present=new Set(entries.map(x=>x.key));
  const missing=requirements.map(req=>{
-  if(!req||!PERIODS.includes(req.period)||!RESIDENCES.includes(req.residence)||!TYPES.includes(req.type)||typeof req.insurance!=="string"||!req.insurance.trim()||typeof req.credit!=="boolean")throw new Error("Ongeldige vereiste tabelcombinatie");
+  if(!req||!PERIODS.includes(req.period)||!RESIDENCES.includes(req.residence)||!TYPES.includes(req.type)||typeof req.insurance!=="string"||!/^[A-Za-z0-9_-]{1,40}$/.test(req.insurance)||typeof req.credit!=="boolean")throw new Error("Ongeldige vereiste tabelcombinatie");
   return {key:[2026,req.period,req.residence,req.type,req.insurance,req.credit].join("|"),selection:req};
  }).filter(x=>!present.has(x.key));
  return {year:2026,groups:entries.length,totalRows:entries.reduce((n,e)=>n+e.rows,0),entries,missing,complete:false,notice:"Aanwezige combinaties en aaneengesloten intervallen bewijzen niet dat de officiële tabellen volledig of correct zijn."};
