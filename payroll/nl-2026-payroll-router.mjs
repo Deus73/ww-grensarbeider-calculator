@@ -4,6 +4,7 @@ export function calculatePayroll2026(table,input){
  if(!input||typeof input!=="object")throw Error("Ongeldige invoer");
  if(!["UNDER_AOW","FULL_YEAR_AOW","REACHES_AOW_2026"].includes(input.ageGroup))return {status:"unsupported",reason:"AOW-leeftijdscategorie ontbreekt",withholding:null};
  if(input.ageGroup==="REACHES_AOW_2026"||input.herleiding!==undefined||input.international===true)return {status:"unsupported",reason:"AOW-overgang of herleiding vereist afzonderlijk geverifieerde regels",withholding:null};
+ if(input.ageGroup!=="UNDER_AOW")return {status:"unsupported",reason:"Ingeladen tabel heeft geen AOW-geboortejaarcategorie; inhouding kan niet veilig worden geselecteerd",withholding:null};
  if(table?.groups instanceof Map){
   const r=lookupWithholding(table,input);
   return {...r,verifiedOfficial:false,calculationMode:"imported-table"};
