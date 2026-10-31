@@ -7,7 +7,7 @@ on:
       - '.github/workflows/android-apk.yml'
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -32,3 +32,17 @@ jobs:
           name: GrensCalc-Android-APK
           path: android-app/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+      - name: Prepare APK for public download
+        run: cp android-app/app/build/outputs/apk/debug/app-debug.apk GrensCalc.apk
+      - name: Publish downloadable APK on GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-latest
+          name: GrensCalc Android APK (online webapp)
+          prerelease: true
+          make_latest: false
+          files: GrensCalc.apk
+          overwrite_files: true
+          body: |
+            Android WebView-app die altijd de online GrensCalc-webapp opent.
+            Dit is een debug-ondertekende APK, niet een Play Store-release.
