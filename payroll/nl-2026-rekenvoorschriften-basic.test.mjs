@@ -1,0 +1,16 @@
+import {strict as assert} from "node:assert";
+import {calculateNl2026NoCredit as calc} from "./nl-2026-rekenvoorschriften-basic.mjs";
+const base={period:"maand",residence:"NL",type:"wit",insurance:"VOLLEDIG",credit:false,ageGroup:"UNDER_AOW"};
+assert.deepEqual([670.50,675,679.50,684,688.50,693,697.50,702,706.50].map(w=>calc({...base,wage:w}).withholding),[239.67,241.25,242.92,244.50,246.08,247.67,249.33,250.92,252.50]);
+assert.equal(calc({...base,wage:0}).withholding,0);
+assert.equal(calc({...base,wage:3000}).withholding,1071.42);
+assert.equal(calc({...base,wage:3240.25}).annualWage,38880);
+assert.equal(calc({...base,wage:7000}).withholding,2624.67);
+assert.equal(calc({...base,wage:11092.5}).annualWage,133110);
+assert.equal(calc({...base,wage:11092.51}).status,"unsupported");
+for(const period of ["dag","week","vierweken","maand","kwartaal"])assert.equal(calc({...base,period,wage:100}).status,"ok");
+for(const changes of [{credit:true},{residence:"BE"},{ageGroup:"AOW"},{insurance:"ALLEEN_BELASTING"},{special:true},{anonymous:true},{herleiding:"AG"},{period:"jaar"}])assert.equal(calc({...base,wage:1000,...changes}).status,"unsupported");
+for(const wage of [-1,1.001,NaN,Infinity,1e20])assert.throws(()=>calc({...base,wage}),/Ongeldig/);
+assert.throws(()=>calc(null),/Ongeldige/);
+assert.equal(calc({...base,wage:1000}).verifiedOfficial,false);
+console.log("Rekenvoorschriften-basistests voltooid; vergelijkingen zijn nog niet onafhankelijk geverifieerd.");
