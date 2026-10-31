@@ -8,7 +8,7 @@ export function comparePayrollCases(table,cases){
  const results=cases.map((item,i)=>{
   if(!item||typeof item!=="object"||!item.input||!Number.isSafeInteger(item.expectedCents)||item.expectedCents<0)throw new Error("Ongeldige referentiecase "+(i+1));
   const source=item.source;
-  if(!source||!isBelastingdienstSourceUrl(source.url)||typeof source.document!=="string"||!source.document.trim()||!source.page||!source.date)throw new Error("Case "+(i+1)+" mist een controleerbare bron, pagina of datum.");
+  if(!source||!isBelastingdienstSourceUrl(source.url)||typeof source.document!=="string"||!source.document.trim()||(typeof source.page!=="string"&&typeof source.page!=="number")||!String(source.page).trim()||typeof source.date!=="string"||!/^2026-(0[1-9]|1[0-2])-([0-2][0-9]|3[01])$/.test(source.date)||Number.isNaN(Date.parse(source.date))||new Date(source.date+"T00:00:00Z").toISOString().slice(0,10)!==source.date)throw new Error("Case "+(i+1)+" mist een controleerbare bron, pagina of datum.");
   const key=JSON.stringify([item.input.wage,item.input.period,item.input.residence,item.input.type,item.input.insurance,item.input.credit,item.input.special===true,item.input.anonymous===true]);
   if(seen.has(key))throw new Error("Dubbele referentiecase "+(i+1));
   seen.add(key);
