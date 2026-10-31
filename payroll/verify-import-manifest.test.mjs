@@ -13,4 +13,9 @@ assert.throws(()=>verifyImportManifest({...current,schema:"other"},current),/Ong
 assert.throws(()=>verifyImportManifest({...current,verifiedOfficial:true},current),/ten onrechte/);
 assert.throws(()=>verifyImportManifest(current,null),/Laad/);
 assert.throws(()=>verifyImportManifest(current,{...current,sha256:"invalid"}),/SHA-256/);
-console.log("11 importbewijsvergelijkingen geslaagd.");
+assert.throws(()=>verifyImportManifest({...current,sha256:"not-a-hash"},current),/SHA-256/);
+assert.throws(()=>verifyImportManifest({...current,groups:0},current),/tabelomvang/);
+assert.throws(()=>verifyImportManifest({...current,extra:"spoof"},current),/Onbekend veld/);
+assert.throws(()=>verifyImportManifest({...current,source:{...current.source,verified:true}},current),/Onbekend bronveld/);
+assert.throws(()=>verifyImportManifest({...current,filename:"../fake.csv"},current),/bestandsnaam/);
+console.log("16 importbewijsvergelijkingen geslaagd.");
