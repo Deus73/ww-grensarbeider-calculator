@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+ <key>PayloadContent</key>
+ <array>
+  <dict>
+   <key>FullScreen</key><true/>
+   <key>IsRemovable</key><true/>
+   <key>Label</key><string>GrensCalc</string>
+   <key>PayloadDescription</key><string>Voegt een GrensCalc-webclip toe aan het beginscherm.</string>
+   <key>PayloadDisplayName</key><string>GrensCalc webapp</string>
+   <key>PayloadIdentifier</key><string>nl.grenscalc.webclip</string>
+   <key>PayloadType</key><string>com.apple.webClip.managed</string>
+   <key>PayloadUUID</key><string>7A62036A-0E37-4E30-B8D1-AE2EFC1BBF29</string>
+   <key>PayloadVersion</key><integer>1</integer>
+   <key>Precomposed</key><true/>
+   <key>URL</key><string>https://deus73.github.io/ww-grensarbeider-calculator/</string>
+  </dict>
+ </array>
+ <key>PayloadDescription</key><string>Installeert uitsluitend een verwijderbare snelkoppeling naar de GrensCalc-webapp. Geen apparaatbeheer, certificaten, VPN of andere instellingen.</string>
+ <key>PayloadDisplayName</key><string>GrensCalc voor iOS</string>
+ <key>PayloadIdentifier</key><string>nl.grenscalc.ios.webclip</string>
+ <key>PayloadOrganization</key><string>GrensCalc</string>
+ <key>PayloadRemovalDisallowed</key><false/>
+ <key>PayloadType</key><string>Configuration</string>
+ <key>PayloadUUID</key><string>9ACB91DF-4C8E-41F2-BDBA-B80D0C42D94F</string>
+ <key>PayloadVersion</key><integer>1</integer>
+</dict>
+</plist>
