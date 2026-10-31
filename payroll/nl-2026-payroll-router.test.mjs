@@ -13,6 +13,7 @@ assert.equal(calculate(table,{...input,ageGroup:"REACHES_AOW_2026"}).status,"uns
 assert.equal(calculate(table,{...input,herleiding:"BH"}).status,"unsupported");
 assert.equal(calculate(table,{...input,international:true}).status,"unsupported");
 assert.equal(calculate(null,{...input,ageGroup:"FULL_YEAR_AOW"}).status,"unsupported");
+assert.equal(calculate(table,{...input,ageGroup:"FULL_YEAR_AOW"}).status,"unsupported");
 assert.equal(calculate(table,{...input,ageGroup:"UNKNOWN"}).status,"unsupported");
 assert.throws(()=>calculate(table,null),/Ongeldige/);
 console.log("Payroll router smoke tests passed (synthetic table).");
