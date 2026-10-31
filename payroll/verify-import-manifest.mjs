@@ -4,6 +4,7 @@ export function verifyImportManifest(expected,current){
  if(!expected||typeof expected!=="object"||expected.schema!=="grenscalc-import-manifest-v1"||expected.year!==2026)throw Error("Ongeldig of onbekend importbewijs");
  if(!current||typeof current!=="object")throw Error("Laad eerst opnieuw een CSV-bestand");
  const validated=createImportManifest(current);
+ if(expected.verifiedOfficial!==false)throw Error("Importbewijs claimt ten onrechte officiële verificatie");
  const normalizedExpected=createImportManifest(expected);
  if(Object.keys(expected).some(k=>!["schema","year","filename","size","sha256","source","groups","rows","verifiedOfficial","notice"].includes(k)))throw Error("Onbekend veld in importbewijs");
  if(Object.keys(expected.source).some(k=>!["url","document","date"].includes(k)))throw Error("Onbekend bronveld in importbewijs");
