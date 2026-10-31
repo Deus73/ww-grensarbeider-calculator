@@ -1,13 +1,14 @@
 import {strict as assert} from "node:assert";
 import {readFileSync} from "node:fs";
 const html=readFileSync(new URL("../loonheffing-2026.html",import.meta.url),"utf8");
-for(const id of ["sample","load","calculate","compare","downloadReport","compareOfficial","loadResult","result","comparison","shareScenario","shareResult","runBatch","downloadBatch","inventory","inventoryCsv","compareNet","downloadManifest","manifestResult"])assert.match(html,new RegExp('id="'+id+'"'));
+for(const id of ["sample","load","calculate","compare","downloadReport","compareOfficial","loadResult","result","comparison","shareScenario","shareResult","runBatch","downloadBatch","inventory","inventoryCsv","compareNet","downloadManifest","manifestResult","verifyManifestFile","verifyManifest","verifyManifestResult"])assert.match(html,new RegExp('id="'+id+'"'));
 for(const marker of ["grenscalc-loonheffing-2026-sjabloon.csv","const details=","Indicatief netto:","grenscalc-referentiecontrole-2026.json"])assert.ok(html.includes(marker),marker);
 const script=html.match(/<script type="module">([\s\S]*?)<\/script>/)?.[1];assert.ok(script,"Module-script ontbreekt");
 new Function(script.replace(/^import .*;$/gm,""));
 assert.match(html,/geen officiële tabellen meegeleverd/);
 assert.match(html,/crypto\.subtle\.digest\("SHA-256"/);
 assert.match(html,/createImportManifest\(/);
+assert.match(html,/verifyImportManifest\(expected,importManifest\)/);
 assert.match(html,/decodePayrollScenario\(location\.search\)/);
 assert.match(html,/encodePayrollScenario\(scenarioInput\(\)\)/);
 assert.match(html,/fetch\("\.\/payroll\/official-nl-2026-sample-cases\.json"/);
