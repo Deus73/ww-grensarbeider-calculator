@@ -22,6 +22,8 @@ jobs:
           node-version: '22'
       - name: Controleer Nederlandse rekenvoorschriften 2026 basisformule
         run: node payroll/nl-2026-rekenvoorschriften-basic.test.mjs
+      - name: Vergelijk rekenformule met geïmporteerde tijdvaktabel
+        run: node payroll/compare-formula-table.test.mjs
       - name: Controleer Nederlandse tabeladapter
         run: node payroll/nl-2026-table-engine.test.mjs
       - name: Controleer herimport met bestaand importbewijs
