@@ -13,4 +13,5 @@ assert.throws(()=>comparePayrollCases(table,[ref,ref]),/Dubbele/);
 assert.throws(()=>comparePayrollCases(table,[{...ref,source:{...source}}]),/bron/);
 assert.throws(()=>comparePayrollCases(table,[{...ref,expectedCents:-1}]),/Ongeldige/);
 assert.equal(comparePayrollCases(table,[ref]).verified,false);
-console.log("8 browser-referentiecontroles geslaagd; uitsluitend synthetische bedragen.");
+assert.throws(()=>comparePayrollCases(table,[{...ref,source:{...ref.source,url:"https://www.belastingdienst.nl.evil.example/2026.pdf"}}]),/bron/);
+console.log("9 browser-referentiecontroles geslaagd; uitsluitend synthetische bedragen.");
