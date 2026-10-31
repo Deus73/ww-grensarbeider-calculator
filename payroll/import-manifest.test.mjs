@@ -16,4 +16,9 @@ assert.throws(()=>createImportManifest({...input,filename:"../evil.csv"}),/besta
 assert.throws(()=>createImportManifest({...input,size:20_000_001}),/bestandsgrootte/);
 assert.throws(()=>createImportManifest({...input,rows:0}),/tabelomvang/);
 assert.throws(()=>createImportManifest({...input,source:null}),/Bronmetadata/);
-console.log("12 importbewijscontroles geslaagd.");
+assert.throws(()=>createImportManifest({...input,source:{...input.source,url:"https://belastingdienst.nl.evil.test/tabel"}}),/bron-URL/);
+assert.throws(()=>createImportManifest({...input,source:{...input.source,url:"http://download.belastingdienst.nl/test.pdf"}}),/bron-URL/);
+assert.throws(()=>createImportManifest({...input,source:{...input.source,date:"2026-02-30"}}),/brondatum/);
+assert.throws(()=>createImportManifest({...input,source:{...input.source,date:"2025-12-31"}}),/brondatum/);
+assert.throws(()=>createImportManifest({...input,source:{...input.source,document:"   "}}),/bronomschrijving/);
+console.log("17 importbewijscontroles geslaagd.");
