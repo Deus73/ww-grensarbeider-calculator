@@ -20,6 +20,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Valideer onafhankelijke officiele maandtabel 2026
+        run: node payroll/nl-2026-official-monthly-fixtures.test.mjs
       - name: Vergelijk onafhankelijke officiele parameters 2026
         run: node payroll/nl-2026-official-parameters.test.mjs
       - name: Controleer loonadministratie-router 2026
