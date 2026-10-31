@@ -4,7 +4,7 @@ De module is een **tabelgestuurde hulpmodule**, geen gecertificeerde loonadminis
 
 ## Officiële rekenbronnen 2026
 
-De Belastingdienst publiceert **Rekenvoorschriften voor de geautomatiseerde loonadministratie januari 2026, versie 2** met afzonderlijke bijlage voor parameterwaarden, substitutiewaarden en herleidingsfactoren. Het Handboek Loonheffingen 2026 heeft bovendien een uitgave van oktober 2026. Deze documenten zijn leidend bij de nog te bouwen zelfstandige rekenmotor; de bestaande tabeladapter rekent deze formules **niet** zelf uit.
+De Belastingdienst publiceert **Rekenvoorschriften voor de geautomatiseerde loonadministratie januari 2026, versie 2** met afzonderlijke bijlage voor parameterwaarden, substitutiewaarden en herleidingsfactoren. De openbare downloadpagina van het Handboek Loonheffingen vermeldt momenteel de uitgave maart 2026. Deze documenten zijn leidend bij de nog te bouwen zelfstandige rekenmotor; de bestaande tabeladapter rekent deze formules **niet** zelf uit.
 
 - Rekenvoorschriften: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/themaoverstijgend/brochures_en_publicaties/rekenvoorschriften-voor-de-geautomatiseerde-loonadministratie
 - Handboek: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/themaoverstijgend/brochures_en_publicaties/handboek-loonheffingen
@@ -38,7 +38,7 @@ De Belastingdienst publiceert **Rekenvoorschriften voor de geautomatiseerde loon
 - [Handboek Loonheffingen](https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/themaoverstijgend/brochures_en_publicaties/handboek-loonheffingen)
 - [Rekenvoorschriften](https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/themaoverstijgend/brochures_en_publicaties/rekenvoorschriften-voor-de-geautomatiseerde-loonadministratie)
 
-De Belastingdienst publiceerde op 27 oktober 2026 een tweede uitgave van het Handboek Loonheffingen 2026. Wijzigingen daaruit moeten nog op impact worden beoordeeld.
+De uitgave van oktober 2026 is niet bevestigd op de officiële downloadpagina (controle 31 oktober 2026); gebruik geen onbevestigde editie als bron voor fiscale regels.
 
 ## Tests
 
