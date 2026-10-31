@@ -2,6 +2,16 @@
 
 De module is een **tabelgestuurde hulpmodule**, geen gecertificeerde loonadministratie of volledige grensarbeiderberekening. Een bron-URL of door de gebruiker aangeleverde CSV bewijst **niet** dat de bedragen officieel, volledig of actueel zijn. Elke geïmporteerde tabel heeft daarom `verifiedOfficial: false`.
 
+## Officiële rekenbronnen 2026
+
+De Belastingdienst publiceert **Rekenvoorschriften voor de geautomatiseerde loonadministratie januari 2026, versie 2** met afzonderlijke bijlage voor parameterwaarden, substitutiewaarden en herleidingsfactoren. Het Handboek Loonheffingen 2026 heeft bovendien een uitgave van oktober 2026. Deze documenten zijn leidend bij de nog te bouwen zelfstandige rekenmotor; de bestaande tabeladapter rekent deze formules **niet** zelf uit.
+
+- Rekenvoorschriften: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/themaoverstijgend/brochures_en_publicaties/rekenvoorschriften-voor-de-geautomatiseerde-loonadministratie
+- Handboek: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/themaoverstijgend/brochures_en_publicaties/handboek-loonheffingen
+- Tabellen: https://www.belastingdienst.nl/wps/wcm/connect/nl/personeel-en-loon/content/hulpmiddel-loonbelastingtabellen
+
+**Fail-closed:** AOW-/leeftijds-, herleidings- en internationale uitzonderingsvlaggen worden niet stilzwijgend genegeerd bij tabelopzoeking; deze gevallen vereisen afzonderlijke geverifieerde regels.
+
 ## Beschikbare functies
 
 - CSV-import met tabelidentificatie (2026, tijdvak, woonland, wit/groen, verzekering en loonheffingskorting).
