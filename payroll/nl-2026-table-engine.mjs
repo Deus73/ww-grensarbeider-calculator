@@ -48,10 +48,14 @@ export function makeTable(rows, source) {
   return Object.freeze({source:Object.freeze({...source}),groups,verifiedOfficial:false});
 }
 export function lookupWithholding(table, input) {
-  if (!table || !table.groups) throw new Error("Geen gevalideerde tabel geladen");
+  if (!table || !(table.groups instanceof Map)) throw new Error("Geen gevalideerde tabel geladen");
+  if (!input || typeof input!=="object") throw new Error("Ongeldig loonverzoek");
   if (!exactCents(input.wage) || input.wage < 0) throw new Error("Ongeldig tijdvakloon");
   if (input.special === true) return {status:"unsupported",reason:"Gebruik officiële tabel bijzondere beloningen"};
   if (input.anonymous === true) return {status:"unsupported",reason:"Anoniementarief vereist aparte regels"};
+  if (input.special!==undefined && input.special!==false) return {status:"unsupported",reason:"Ongeldige keuze bijzondere beloningen"};
+  if (input.anonymous!==undefined && input.anonymous!==false) return {status:"unsupported",reason:"Ongeldige keuze anoniementarief"};
+  if (input.aow!==undefined || input.age!==undefined || input.herleiding!==undefined || input.herleidingsfactor!==undefined || input.international!==undefined) return {status:"unsupported",reason:"AOW, leeftijd en herleidings- of internationale uitzonderingen vereisen afzonderlijke officiële rekenregels"};
   if (!PERIODS.includes(input.period) || !RESIDENCES.includes(input.residence) || !TYPES.includes(input.type) || typeof input.credit!=="boolean" || !validInsurance(input.insurance)) return {status:"unsupported",reason:"Onvolledige tabelselectie"};
   const k=[2026,input.period,input.residence,input.type,input.insurance,input.credit].join("|");
   const rows=table.groups.get(k);
