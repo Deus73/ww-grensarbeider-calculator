@@ -18,19 +18,21 @@ export function isBelastingdienstSourceUrl(value) {
  } catch {return false;}
 }
 const cents = n => Math.round((n + Number.EPSILON) * 100);
-const exactCents = n => finite(n) && Math.abs(n * 100 - Math.round(n * 100)) < 1e-7;
+const exactCents = n => finite(n) && n>=0 && Number.isSafeInteger(Math.round(n*100)) && Math.abs(n * 100 - Math.round(n * 100)) < 1e-7;
+const validInsurance = v => typeof v==="string" && /^[A-Za-z0-9_-]{1,40}$/.test(v);
+const validDate2026 = v => typeof v==="string" && /^2026-(0[1-9]|1[0-2])-([0-2][0-9]|3[01])$/.test(v) && new Date(v+"T00:00:00Z").toISOString().slice(0,10)===v;
 export function validateRow(row) {
   if (!row || typeof row !== "object") throw new Error("Ongeldige tabelrij");
   for (const field of ["year","period","residence","type","insurance","credit","lower","upper","withholding"]) {
     if (!(field in row)) throw new Error("Ontbrekend veld: "+field);
   }
   if (row.year !== 2026 || !PERIODS.includes(row.period) || !RESIDENCES.includes(row.residence) || !TYPES.includes(row.type)) throw new Error("Ongeldige tabelidentificatie");
-  if (typeof row.insurance !== "string" || !row.insurance || typeof row.credit !== "boolean") throw new Error("Verzekering of loonheffingskorting ontbreekt");
+  if (!validInsurance(row.insurance) || typeof row.credit !== "boolean") throw new Error("Verzekering of loonheffingskorting ontbreekt");
   if (![row.lower,row.upper,row.withholding].every(exactCents) || row.lower < 0 || row.upper <= row.lower || row.withholding < 0) throw new Error("Ongeldig looninterval of inhouding");
   return Object.freeze({...row});
 }
 export function makeTable(rows, source) {
-  if (!source || !isBelastingdienstSourceUrl(source.url) || !source.document || !/^2026-(0[1-9]|1[0-2])-([0-2][0-9]|3[01])$/.test(source.date||"") || Number.isNaN(Date.parse(source.date))) throw new Error("Controleerbare Belastingdienst-bron en geldige datum vereist");
+  if (!source || !isBelastingdienstSourceUrl(source.url) || !source.document || !validDate2026(source.date)) throw new Error("Controleerbare Belastingdienst-bron en geldige datum vereist");
   if (!Array.isArray(rows) || rows.length === 0) throw new Error("Geen tabelgegevens aangeleverd");
   const clean = rows.map(validateRow);
   const key = r => [r.year,r.period,r.residence,r.type,r.insurance,r.credit].join("|");
@@ -50,7 +52,7 @@ export function lookupWithholding(table, input) {
   if (!exactCents(input.wage) || input.wage < 0) throw new Error("Ongeldig tijdvakloon");
   if (input.special === true) return {status:"unsupported",reason:"Gebruik officiële tabel bijzondere beloningen"};
   if (input.anonymous === true) return {status:"unsupported",reason:"Anoniementarief vereist aparte regels"};
-  if (!PERIODS.includes(input.period) || !RESIDENCES.includes(input.residence) || !TYPES.includes(input.type) || typeof input.credit!=="boolean" || !input.insurance) return {status:"unsupported",reason:"Onvolledige tabelselectie"};
+  if (!PERIODS.includes(input.period) || !RESIDENCES.includes(input.residence) || !TYPES.includes(input.type) || typeof input.credit!=="boolean" || !validInsurance(input.insurance)) return {status:"unsupported",reason:"Onvolledige tabelselectie"};
   const k=[2026,input.period,input.residence,input.type,input.insurance,input.credit].join("|");
   const rows=table.groups.get(k);
   if (!rows) return {status:"missing-table",reason:"Officiële tabel voor deze combinatie ontbreekt"};
@@ -68,7 +70,7 @@ export function auditTableCoverage(table, requirements) {
   if (!table || !(table.groups instanceof Map)) throw new Error("Geen gevalideerde tabel geladen");
   if (!Array.isArray(requirements)) throw new Error("Vereiste combinaties moeten een lijst zijn");
   const results=requirements.map(req=>{
-    if (!req || !PERIODS.includes(req.period) || !RESIDENCES.includes(req.residence) || !TYPES.includes(req.type) || typeof req.credit!=="boolean" || typeof req.insurance!=="string" || !req.insurance) throw new Error("Ongeldige tabelcombinatie");
+    if (!req || !PERIODS.includes(req.period) || !RESIDENCES.includes(req.residence) || !TYPES.includes(req.type) || typeof req.credit!=="boolean" || !validInsurance(req.insurance)) throw new Error("Ongeldige tabelcombinatie");
     const key=[2026,req.period,req.residence,req.type,req.insurance,req.credit].join("|");
     const rows=table.groups.get(key);
     return Object.freeze({key,present:!!rows,rows:rows?.length??0,firstWage:rows?.[0]?.lower??null,lastWage:rows?.[rows.length-1]?.upper??null,coverageComplete:false,reason:"Zonder officiële grenswaarden en bronvergelijking is volledige dekking niet aantoonbaar"});
