@@ -10,6 +10,6 @@ export function calculateNetFromTable(table,input,extras={}){
  const tax=lookupWithholding(table,input);
  if(tax.status!=="ok")return {status:tax.status,reason:tax.reason,net:null};
  const grossCents=Math.round(wage*100),taxCents=Math.round(tax.withholding*100),otherCents=Math.round(deduction*100);
- if(!validMoney(tax.withholding)||!Number.isSafeInteger(grossCents-taxCents-otherCents))return {status:"invalid-result",reason:"Ongeldig of te groot inhoudingsbedrag; netto niet berekend",net:null};
+ if(!validMoney(tax.withholding)||!Number.isSafeInteger(Number(BigInt(grossCents)-BigInt(taxCents)-BigInt(otherCents))))return {status:"invalid-result",reason:"Ongeldig of te groot inhoudingsbedrag; netto niet berekend",net:null};
  return {status:"ok",gross:wage,withholding:tax.withholding,otherDeductions:deduction,net:Number(BigInt(grossCents)-BigInt(taxCents)-BigInt(otherCents))/100,source:tax.source,matchedRange:tax.matchedRange,scope:"Netto na ingeladen loonheffing en opgegeven overige inhoudingen; geen volledige loonstrook of grensarbeiderberekening"};
 }
