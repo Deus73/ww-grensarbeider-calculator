@@ -20,6 +20,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Controleer jaarlijkse heffingskortingen 2026
+        run: node payroll/nl-2026-annual-credits.test.mjs
       - name: Controleer Nederlandse rekenvoorschriften 2026 basisformule
         run: node payroll/nl-2026-rekenvoorschriften-basic.test.mjs
       - name: Vergelijk rekenformule met geïmporteerde tijdvaktabel
