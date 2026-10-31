@@ -18,7 +18,7 @@ export function decodePayrollScenario(query){
  const keys=["wage","period","residence","type","insurance","credit"];
  if([...params.keys()].some(k=>!keys.includes(k))||keys.some(k=>params.getAll(k).length!==1))throw Error("Ongeldige of onvolledige deellink");
  const wageText=params.get("wage");
- if(!/^(?:0|[1-9]\d{0,12})(?:\.\d{1,2})?$/.test(wageText))throw Error("Ongeldig loon");
+ if(!/^(?:0|[1-9]\d{0,13})(?:\.\d{1,2})?$/.test(wageText))throw Error("Ongeldig loon");
  const credit=params.get("credit");
  if(credit!=="true"&&credit!=="false")throw Error("Ongeldige loonheffingskorting");
  const scenario={wage:Number(wageText),period:params.get("period"),residence:params.get("residence"),type:params.get("type"),insurance:params.get("insurance"),credit:credit==="true"};
