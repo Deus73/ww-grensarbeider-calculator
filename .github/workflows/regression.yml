@@ -22,6 +22,8 @@ jobs:
           node-version: '22'
       - name: Controleer Nederlandse tabeladapter
         run: node payroll/nl-2026-table-engine.test.mjs
+      - name: Controleer herimport met bestaand importbewijs
+        run: node payroll/verify-import-manifest.test.mjs
       - name: Controleer SHA-256 importbewijs en metadata
         run: node payroll/import-manifest.test.mjs
       - name: Controleer CSV-import loonbelastingtabellen
