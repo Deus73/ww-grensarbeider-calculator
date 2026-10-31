@@ -12,6 +12,12 @@ De Belastingdienst publiceert **Rekenvoorschriften voor de geautomatiseerde loon
 
 **Fail-closed:** AOW-/leeftijds-, herleidings- en internationale uitzonderingsvlaggen worden niet stilzwijgend genegeerd bij tabelopzoeking; deze gevallen vereisen afzonderlijke geverifieerde regels.
 
+## Nieuwe beperkte rekenmotor (2026 versie 2)
+
+`nl-2026-rekenvoorschriften-basic.mjs` bevat een zelfstandige berekening voor uitsluitend **Nederlandse inwoners onder de AOW-leeftijd, volledig verzekerd, zonder loonheffingskorting, zonder bijzondere beloningen**. De module gebruikt de officiële 2026-v2 tijdvakfactoren, jaarloonstap van €54, Lmax €133.110, tariefschijven en afronding. Voor alle andere situaties geeft zij `unsupported` in plaats van een gegokt bedrag. De module is nog **niet aangesloten op de productie-interface** en nog **niet onafhankelijk gevalideerd** tegen de volledige officiële tijdvaktabellen. De nieuwe tests gebruiken onder meer negen bestaande referentiebedragen waarvan de authenticiteit nog gecontroleerd moet worden.
+
+Officiële voorschriften: https://download.belastingdienst.nl/belastingdienst/docs/rekenvoorschriften_voor_geautomatiseerde_loonadministratie_lh991z62fd.pdf
+
 ## Beschikbare functies
 
 - CSV-import met tabelidentificatie (2026, tijdvak, woonland, wit/groen, verzekering en loonheffingskorting).
