@@ -14,4 +14,8 @@ assert.throws(()=>comparePayrollCases(table,[{...ref,source:{...source}}]),/bron
 assert.throws(()=>comparePayrollCases(table,[{...ref,expectedCents:-1}]),/Ongeldige/);
 assert.equal(comparePayrollCases(table,[ref]).verified,false);
 assert.throws(()=>comparePayrollCases(table,[{...ref,source:{...ref.source,url:"https://www.belastingdienst.nl.evil.example/2026.pdf"}}]),/bron/);
-console.log("9 browser-referentiecontroles geslaagd; uitsluitend synthetische bedragen.");
+assert.throws(()=>comparePayrollCases(table,[{...ref,source:{...ref.source,date:"2026-02-30"}}]),/bron/);
+assert.throws(()=>comparePayrollCases(table,[{...ref,source:{...ref.source,date:"2025-12-31"}}]),/bron/);
+assert.throws(()=>comparePayrollCases(table,[{...ref,source:{...ref.source,page:"  "}}]),/bron/);
+assert.throws(()=>comparePayrollCases(table,[{...ref,source:{...ref.source,page:{value:1}}}]),/bron/);
+console.log("13 browser-referentiecontroles geslaagd; uitsluitend synthetische bedragen.");
