@@ -10,4 +10,5 @@ assert.equal(report.passed,0);
 assert.equal(report.results[0].status,"missing-table");
 assert.equal(report.results[0].pass,false);
 assert.throws(()=>verifyOfficialCases(table,[{input,expectedCents:30000,source},{input,expectedCents:30000,source}]),/Dubbele/);
-console.log("6 fail-closed validatiecontroles geslaagd; geen officiële bedragen geverifieerd.");
+assert.throws(()=>verifyOfficialCases(table,[{input,expectedCents:30000,source:{...source,url:"https://www.belastingdienst.nl.evil.example/2026.pdf"}}]),/controleerbare/);
+console.log("7 fail-closed validatiecontroles geslaagd; geen officiële bedragen geverifieerd.");
