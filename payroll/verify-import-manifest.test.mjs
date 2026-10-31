@@ -1,0 +1,16 @@
+import {strict as assert} from "node:assert";
+import {createImportManifest} from "./import-manifest.mjs";
+import {verifyImportManifest} from "./verify-import-manifest.mjs";
+const current=createImportManifest({filename:"tabel.csv",size:100,sha256:"a".repeat(64),source:{url:"https://www.belastingdienst.nl/tabellen",document:"test",date:"2026-10-31"},groups:2,rows:30});
+assert.equal(verifyImportManifest(current,current).status,"match");
+assert.equal(verifyImportManifest(current,current).matches,true);
+assert.equal(verifyImportManifest(current,{...current,sha256:"b".repeat(64)}).status,"mismatch");
+assert.deepEqual(verifyImportManifest(current,{...current,sha256:"b".repeat(64)}).differences,["sha256"]);
+assert.deepEqual(verifyImportManifest(current,{...current,source:{...current.source,date:"2026-10-30"}}).differences,["source.date"]);
+assert.deepEqual(verifyImportManifest(current,{...current,rows:29}).differences,["rows"]);
+assert.equal(verifyImportManifest(current,current).verifiedOfficial,false);
+assert.throws(()=>verifyImportManifest({...current,schema:"other"},current),/Ongeldig/);
+assert.throws(()=>verifyImportManifest({...current,verifiedOfficial:true},current),/ten onrechte/);
+assert.throws(()=>verifyImportManifest(current,null),/Laad/);
+assert.throws(()=>verifyImportManifest(current,{...current,sha256:"invalid"}),/SHA-256/);
+console.log("11 importbewijsvergelijkingen geslaagd.");
