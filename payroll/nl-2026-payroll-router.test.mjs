@@ -1,0 +1,18 @@
+import {strict as assert} from "node:assert";
+import {makeTable} from "./nl-2026-table-engine.mjs";
+import {calculatePayroll2026 as calculate} from "./nl-2026-payroll-router.mjs";
+const source={url:"https://www.belastingdienst.nl/test",document:"Synthetic fixture",date:"2026-10-31"};
+const row={year:2026,period:"maand",residence:"NL",type:"wit",insurance:"VOLLEDIG",credit:true,lower:0,upper:5000,withholding:123.45};
+const input={wage:3000,period:"maand",residence:"NL",type:"wit",insurance:"VOLLEDIG",credit:true,ageGroup:"UNDER_AOW"};
+const table=makeTable([row],source);
+assert.equal(calculate(table,input).withholding,123.45);
+assert.equal(calculate(table,input).verifiedOfficial,false);
+assert.equal(calculate(null,input).status,"unsupported");
+assert.equal(calculate(null,{...input,credit:false}).status,"ok");
+assert.equal(calculate(table,{...input,ageGroup:"REACHES_AOW_2026"}).status,"unsupported");
+assert.equal(calculate(table,{...input,herleiding:"BH"}).status,"unsupported");
+assert.equal(calculate(table,{...input,international:true}).status,"unsupported");
+assert.equal(calculate(null,{...input,ageGroup:"FULL_YEAR_AOW"}).status,"unsupported");
+assert.equal(calculate(table,{...input,ageGroup:"UNKNOWN"}).status,"unsupported");
+assert.throws(()=>calculate(table,null),/Ongeldige/);
+console.log("Payroll router smoke tests passed (synthetic table).");
