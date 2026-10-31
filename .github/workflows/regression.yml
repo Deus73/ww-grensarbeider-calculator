@@ -50,6 +50,8 @@ jobs:
         run: node payroll/exact-official-samples.test.mjs
       - name: Controleer officiële NL 2026 referentiebedragen
         run: node payroll/official-nl-2026-samples.test.mjs
+      - name: Controleer echte ESM-imports en exports van payrollmodules
+        run: node tests/payroll-module-integrity.test.mjs
       - name: Controleer payrollpagina
         run: node tests/payroll-page.test.mjs
       - name: Controleer ingebouwde calculatorregressies
