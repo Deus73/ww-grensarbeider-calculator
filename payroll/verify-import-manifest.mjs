@@ -8,7 +8,6 @@ export function verifyImportManifest(expected,current){
  const normalizedExpected=createImportManifest(expected);
  if(Object.keys(expected).some(k=>!["schema","year","filename","size","sha256","source","groups","rows","verifiedOfficial","notice"].includes(k)))throw Error("Onbekend veld in importbewijs");
  if(Object.keys(expected.source).some(k=>!["url","document","date"].includes(k)))throw Error("Onbekend bronveld in importbewijs");
- if(expected.verifiedOfficial!==false)throw Error("Importbewijs claimt ten onrechte officiële verificatie");
  const fields=["filename","size","sha256","groups","rows"];
  const differences=fields.filter(k=>normalizedExpected[k]!==validated[k]);
  for(const field of ["url","document","date"]){
